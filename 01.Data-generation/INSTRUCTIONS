@@ -1,0 +1,20 @@
+## FastAPI
+
+pip install fastapi uvicorn requests websockets
+
+
+### 1. Download OBJ Files
+
+notebook sample code objverse
+/Data-generation/Objeverse
+
+### 2. Transform OBJ to Bullet Scene File
+/maya
+
+### 3. Attach CSV Config to Bullet File
+
+
+### 4. Set-up CSV-Bullet Folder for Vutlr Instance
+
+### 5. Run Command and Process Results in Dashboard
+

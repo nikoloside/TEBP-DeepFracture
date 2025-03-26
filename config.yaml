@@ -1,0 +1,5 @@
+# Data Generation
+shape_category: "abstract_animal"
+data_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/src"
+data_norm_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/norm"
+data_bullet_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/bullet"
