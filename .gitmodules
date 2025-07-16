@@ -1,0 +1,6 @@
+[submodule "01.Data-generation/03-SimulationInstanceManager/DockerFracture"]
+	path = 01.Data-generation/03-SimulationInstanceManager/DockerFracture
+	url = https://github.com/nikoloside/fracturerb-docker
+[submodule "00.third-party/Manifold"]
+	path = 00.third-party/Manifold
+	url = https://github.com/hjwdzh/Manifold

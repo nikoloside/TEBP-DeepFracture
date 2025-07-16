@@ -1,0 +1,17 @@
+# requirements.txt 
+wandb
+vedo
+numpy < 2.0.0
+scipy
+scikit-image
+scikit-learn
+siren-pytorch
+torch
+torchvision
+pybullet==3.2.6
+pyyaml
+tqdm
+
+
+
+

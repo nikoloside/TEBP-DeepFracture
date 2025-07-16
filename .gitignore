@@ -1,3 +1,17 @@
 # data workspace
 /data/
 .DS_Store
+node_modules/
+.next/
+.env.local
+fracture-proj-3b9c209c01f4.json
+Fiji.app
+*.pt
+**/__pycache__/**
+log.txt
+*.ipynb
+.vscode/
+**/wandb/**
+.python-version
+01.Data-generation/03-SimulationInstanceManager/download.tar.gz
+01.Data-generation/03-SimulationInstanceManager/config.yaml

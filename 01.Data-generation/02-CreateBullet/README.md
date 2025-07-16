@@ -18,6 +18,9 @@
    - If you prefer to use C++, you can create a C++ program that utilizes the Bullet Physics library to set up the simulation. Ensure you have the Bullet library installed and linked correctly in your project.
 
    **Option 2: Using Maya Plugin**
+
    - Alternatively, you can use a Maya plugin to manually create the bullet simulation. This method allows for more visual control and adjustments before running the simulation.
+   - Open the Maya Python Plugin Editor -> Paste the code in maya_plugin.py -> Click play button -> Fill the folder path and click Export button.
+   <img src="imgs/maya.gif" alt="Maya GIF" width="500"/>
 
    Make sure to follow the respective documentation for the Bullet library or the Maya plugin for detailed instructions on setting up the simulation.

@@ -1,5 +1,41 @@
-# Data Generation
-shape_category: "abstract_animal"
-data_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/src"
-data_norm_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/norm"
-data_bullet_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP/data/bullet"
+# 01 Data Generation
+shape_category: "mug"
+foundation_path: "/Users/yuhanghuang/Workspaces/01.research-proj/TEBP"
+
+data_path: "${foundation_path}/data/src"
+data_norm_path: "${foundation_path}/data/norm"
+data_bullet_path: "${foundation_path}/data/bullet"
+
+# 01.03 Simulation Machine Manager
+# Refer to /01.Data-generation/04-SimulationInstanceManager/config.yaml
+
+# 01.04 Dashboard
+# Refer to /01.Data-generation/05-Dashboard/.env.local
+# Refer to /01.Data-generation/05-Dashboard/data.json
+
+# 02 Cook Data
+data_gdrive_path: "${foundation_path}/data/gdrive"
+data_inputSdf_path: "${foundation_path}/data/dataset/input/sdf"
+data_input_path: "${foundation_path}/data/dataset/input"
+data_output_path: "${foundation_path}/data/dataset/output"
+data_dataset_path: "${foundation_path}/data/dataset/SharedResults"
+
+# 03 Training 
+max_impulse: 304527
+save_path: "${foundation_path}/data/dataset/run"
+dataroot: "${foundation_path}/data/dataset/_out_base"
+runName: "base-VQVAE-0/"
+projName: "base"
+log_wandb: False
+use_cuda: True
+train_dataset_size: 8
+train_cookbook_size: 8
+test_dataset_size: 1
+
+# 04 Run-time
+fiji_path: "${foundation_path}/data/run-time/fiji/Fiji.app"
+data_runtime_workspace_path: "${foundation_path}/data/run-time/Runs/"
+data_runtime_data_path: "${foundation_path}/data/run-time/Experiments/"
+source_runtime_path: "${foundation_path}/04.Run-time"
+houdini_path: "/Applications/Houdini/Houdini20.5.584/Frameworks/Python.framework/Versions/3.11/bin/python3.11"
+houdini_libs: "/Applications/Houdini/Houdini20.5.584/Frameworks/Houdini.framework/Versions/Current/Resources/houdini/python3.11libs/"
