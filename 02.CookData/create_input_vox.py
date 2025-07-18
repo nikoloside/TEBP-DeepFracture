@@ -84,8 +84,12 @@ def process_category(category_path, output_path):
             #     minDist = minValue
 
 if __name__ == "__main__":
-    with open("./config.yaml", 'r') as f:
-        config = yaml.safe_load(f)
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from utils_config import load_config
+    
+    config = load_config()
     category_path = os.path.join(config['data_norm_path'], config['shape_category'])
     output_path = os.path.join(config['data_inputSdf_path'], config['shape_category'])
     process_category(category_path, output_path)

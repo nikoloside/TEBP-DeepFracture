@@ -48,7 +48,7 @@ class Utils_visualize:
             f_input.write('{ pos: [%f, %f, %f], direct: [%f, %f, %f], imp: %f }' % (pos[0,0].item(), pos[0,1].item(), pos[0,2].item(), direct[0, 0].item(), direct[0, 1].item(), direct[0, 2].item(), imp.item()))
             f_input.close()
 
-        # 获取设备
+        # Get device
         device = get_device(getattr(opt, 'use_cuda', True))
         
         feature = encoder.predict(pos, direct, imp)
@@ -116,14 +116,14 @@ class Utils_visualize:
         ax.scatter(x, y, z, c=color)
         ax.view_init(30, angle)
         plt.close()
-        # 軸の設定
+        # Set axis
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         ax.set_xlim(-3, 3)
         ax.set_ylim(-3, 3)
         ax.set_zlim(-3, 3)
-        # PIL Image に変換
+        # Convert to PIL Image
         buf = BytesIO()
         fig.savefig(buf, bbox_inches='tight', pad_inches=0.0)
         return Image.open(buf)

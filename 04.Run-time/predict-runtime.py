@@ -5,6 +5,8 @@ from predict.Model.load_VQfinal2resolutionv2 import MultiLatentEncoder, AutoDeco
 import pybullet as p
 import yaml
 import time
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils_config import load_config
 
 size256 = 2
@@ -14,7 +16,7 @@ size64 = 0
 collisionNum = 1
 impulseMax = 10000
 
-config = load_config("./config.yaml")
+config = load_config()
 ws_data = config["data_runtime_data_path"]
 ws_workspace = config["data_runtime_workspace_path"]
 

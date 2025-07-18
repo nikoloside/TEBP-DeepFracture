@@ -23,7 +23,7 @@ def getPos(jsonName):
     impList = []
     dirList = []
     posList = []
-    # 从配置文件读取 maxImpulse
+    # Read maxImpulse from config file
     training_config = get_training_config()
     maxImpulse = training_config.get('max_impulse', 304527)
     with open(jsonName) as f:
@@ -62,7 +62,6 @@ def predict(work_path, objName, imp, pos, direct, is_Big):
 
     start = time.time()
 
-    # imp, pos, direct = getPos("impact/1-c.txt")
     imp = torch.Tensor(imp, device="cpu").to(mps_device)
     pos = torch.Tensor(pos, device="cpu").to(mps_device)
     direct = torch.Tensor(direct, device="cpu").to(mps_device)
@@ -71,12 +70,8 @@ def predict(work_path, objName, imp, pos, direct, is_Big):
 
     feature = encoder.predict(pos, direct, imp).unsqueeze(0)
 
-    # print(feature)
-
     latent_z = torch.FloatTensor(1, 8, device="cpu").to(mps_device)
     init.xavier_normal_(latent_z)
-
-    # print(feature.unsqueeze(0).shape, latent_z.shape)
 
     # Cook
     input_x, min_index, dist = decoder.Cook(feature, latent_z)
@@ -85,24 +80,10 @@ def predict(work_path, objName, imp, pos, direct, is_Big):
 
     # Small
     output = decoder.forwardBig(input_x).squeeze().squeeze()
-    # print(output)
-
-    # ind = 999
-    # save_path=""
-
-    # gif_path = os.path.join(save_path, 'truth_%d.gif' % (ind))
-    # animator = MedicalImageAnimator(output.to('cpu').detach().numpy().copy().squeeze(), [], 0, save=True)
-    # animate = animator.run(gif_path)
-
-    # vox_path = os.path.join(save_path, 'truth_%d.nii' % (ind))
-    # save_as_nib(vox_path, output.to('cpu').detach().numpy().copy())
-
     end = time.time()
 
     time_diff = end - start
     print("predict time: ", time_diff)
-
-    # work_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/run-time/squirrel-2/"
 
     os.makedirs(work_path, exist_ok=True) 
 
@@ -112,10 +93,5 @@ def predict(work_path, objName, imp, pos, direct, is_Big):
         shutil.rmtree(work_path) 
         os.makedirs(work_path, exist_ok=True) 
 
-    # obj_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
     processCagedSDFSeg(output.to('cpu').detach().numpy(), work_path, objName, is_Big)
 
-    # processCagedSDFSeg
-
-    # print(base.latent_vectors)
-    # base.

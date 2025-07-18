@@ -81,9 +81,13 @@ def DownloadProcess(shape_category, data_path, isSelect, start, end):
 print(objaverse.__version__)
 
 # Load configuration
-with open("../../config.yaml", "r") as config_file:
-    config = yaml.safe_load(config_file)
-shape_category = config.get("shape_category", "default_category")
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from utils_config import load_config, get_shape_category
+
+config = load_config()
+shape_category = get_shape_category()
 data_path = config.get("data_path", "downloaded")
 
 DownloadProcess(shape_category, data_path, True, 0, 300)

@@ -16,9 +16,6 @@ print(hou.applicationVersionString())
 import hrpyc
 import time
 
-# path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/"
-# objName = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
-
 if sys.argv[1] != "":
     path = sys.argv[1]
 if sys.argv[2] != "":
@@ -27,7 +24,7 @@ if sys.argv[2] != "":
 
 inputFolder = os.path.join(path, "", "reconstructed.obj")
 outputFolder = os.path.join(path, "out")
-objFile = objName # "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
+objFile = objName
 logFile = os.path.join(path, "log-hou.txt")
 
 connection, hou = hrpyc.import_remote_module()
@@ -41,14 +38,10 @@ file2 = hou.node("/obj/geo1/file2")
 file2.parm("file").set(objFile)
 print("ori obj name: %s" % (file2.parm('file').eval()))
 
-# python1 = hou.node("/obj/geo1/python1")
-# python1.parm("workpath").set(path)
-
 t1 = time.time()
 
 files = glob.glob(inputFolder)
 for filename in files:
-    # filename =  inputFolder + "vol_1_1_%d.obj" % (2)
     file1.parm("file").set(filename)
     name = file1.parm('file').eval()
     outName = os.path.join(outputFolder, os.path.basename(filename))
@@ -61,5 +54,3 @@ log_file = open(logFile,"w")
 t2 = time.time()
 log_file.write("boolean time: %f" % ((t2 - t1)*1000))
 log_file.close()
-
-# hou.ui.displayMessage("Done")

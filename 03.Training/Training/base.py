@@ -41,7 +41,7 @@ class TrainingProcess:
 
         self.log_file = open(self.save_path + "log.txt", "w")
 
-        # 将模型移动到选择的设备
+        # Move models to selected device
         self.decoder = to_device(self.decoder, self.device)
         self.encoder = to_device(self.encoder, self.device)
         

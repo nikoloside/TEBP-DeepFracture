@@ -6,9 +6,6 @@ import os, time, yaml
 from utils_config import get_training_config
 
 
-# Monkey-patch because I trained with a newer version.
-# This can be removed once PyTorch 0.4.x is out.
-# See https://discuss.pytorch.org/t/question-about-rebuild-tensor-v2/14560
 import torch._utils
 try:
     torch._utils._rebuild_tensor_v2
@@ -19,8 +16,6 @@ except AttributeError:
         tensor._backward_hooks = backward_hooks
         return tensor
     torch._utils._rebuild_tensor_v2 = _rebuild_tensor_v2
-
-# from animator3d import MedicalImageAnimator
 
 import nibabel as nib
 
@@ -34,7 +29,7 @@ def getPos(jsonName):
     impList = []
     dirList = []
     posList = []
-    # 从配置文件读取 maxImpulse
+    # Read maxImpulse from config file
     training_config = get_training_config()
     maxImpulse = training_config.get('max_impulse', 304527) * 0.1
     with open(jsonName) as f:
@@ -62,8 +57,6 @@ import shutil
 Shape3Lists = {"squirrel":0, "bunny":1, "lion": 2}
 
 def judge(impList, posList, dirList, collisionNum):
-    # sourcePath = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/"
-    # model = "data/Experiments/network-models/cgf/squirrel-impulse/squirrel-impact-"
     mps_device = torch.device("cpu")
     encoderPath = sourcePath + model + "encoder.pt"
     decoderPath = sourcePath + model + "decoder.pt"
@@ -82,7 +75,6 @@ def judge(impList, posList, dirList, collisionNum):
     dirVec = []
     featureVec = []
 
-    # imp, pos, direct = getPos("impact/1-c.txt")
     for ind in range(collisionNum):
         imp = torch.Tensor(impList[ind], device="cpu").to(mps_device)
         pos = torch.Tensor(posList[ind], device="cpu").to(mps_device)
@@ -134,7 +126,6 @@ def predict(work_path, objName, model, impList, posList, dirList, is_Big, maxVal
     dirVec = []
     featureVec = []
 
-    # imp, pos, direct = getPos("impact/1-c.txt")
     for ind in range(collisionNum):
         imp = torch.Tensor(impList[ind], device="cpu").to(mps_device)
         pos = torch.Tensor(posList[ind], device="cpu").to(mps_device)
@@ -163,13 +154,8 @@ def predict(work_path, objName, model, impList, posList, dirList, is_Big, maxVal
         feature = encoder.predict(fea).unsqueeze(0)
 
     
-
-    # print(feature)
-
     latent_z = torch.FloatTensor(1, 8, device="cpu").to(mps_device)
     init.xavier_normal_(latent_z)
-
-    # print(feature.unsqueeze(0).shape, latent_z.shape)
 
     start = time.time()
 
@@ -177,11 +163,7 @@ def predict(work_path, objName, model, impList, posList, dirList, is_Big, maxVal
     if not isMulShapes:
         input_x, min_index, dist = decoder.Cook(feature, latent_z)
     else:
-        # print(decoder.shapes()[Shape3Lists[name]], feature, latent_z)
         input_x, min_index, dist = decoder.Cook(decoder.shapes()[Shape3Lists[name]].unsqueeze(0), feature, latent_z)
-
-
-    print(input_x, min_index, dist)
 
     # Small
     if is_Big == 2:
@@ -197,19 +179,6 @@ def predict(work_path, objName, model, impList, posList, dirList, is_Big, maxVal
 
     end = time.time()
     print("Pred. Time: ", (end - start))
-    # ind = 999
-    # save_path=""
-
-    # gif_path = os.path.join(save_path, 'truth_%d.gif' % (ind))
-    # animator = MedicalImageAnimator(output.to('cpu').detach().numpy().copy().squeeze(), [], 0, save=True)
-    # animate = animator.run(gif_path)
-
-    # vox_path = os.path.join(save_path, 'truth_%d.nii' % (ind))
-    # save_as_nib(vox_path, output.to('cpu').detach().numpy().copy())
-
-
-
-    # work_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/run-time/squirrel-2/"
 
     os.makedirs(work_path, exist_ok=True) 
 
@@ -219,10 +188,4 @@ def predict(work_path, objName, model, impList, posList, dirList, is_Big, maxVal
         shutil.rmtree(os.path.join(work_path, "objs")) 
     os.makedirs(os.path.join(work_path, "objs"), exist_ok=True) 
 
-    # obj_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
     processCagedSDFSeg(output.to('cpu').detach().numpy(), work_path, objName, is_Big, maxValue)
-
-    # processCagedSDFSeg
-
-    # print(base.latent_vectors)
-    # base.

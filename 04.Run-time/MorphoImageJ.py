@@ -4,9 +4,6 @@ import os
 import numpy as np
 import nibabel as nib
 import shutil
-# ij = imagej.init("/Applications/ImageJ.app", headless=False)
-# print(ij.getVersion())
-
 
 def get_from_nib(file_name):
     img = nib.load(file_name)
@@ -20,31 +17,34 @@ def save_as_nib(file_name, variable):
 
 def getMaskForSdf(data):
     mask = data.copy()
-    mask[data >= 0] = 1 # 内部領域
-    mask[data < 0] = 0 # 外部
+    mask[data >= 0] = 1 # Interior region
+    mask[data < 0] = 0 # Exterior
     return mask
     
 
 def getNormForSdf(data):
     sdf = data.copy()
     print(sdf.min(), sdf.max())
-    sdf[sdf < 0] *= -1 # 内部領域
+    sdf[sdf < 0] *= -1 # Interior region
     # data = (data + gapRange) * innerRange
     sdf = 255 - (sdf + 1) / 2 * 255
     print(sdf.min(), sdf.max())
     return sdf
 #endregion
 
-#region 准备分割
+#region Prepare segmentation
 def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1.0):
     import yaml
     
     # Read config.yaml
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from utils_config import load_config
 
-    config = load_config("./config.yaml")
+    config = load_config()
     sourcePath = config["fiji_path"]
-    #region 导入部分
+    #region Import section
     ij = imagej.init(sourcePath, mode="headless")
     print(ij.getVersion())
 
@@ -79,7 +79,7 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
     dataset = ij.py.to_java(discrete)
     #endregion
 
-    #region 进行分割
+    #region Perform segmentation
     print("Start SegmentationProcess")
     script = """
     // @ImagePlus(label="Input image", description="Image to segment") imp
@@ -132,42 +132,33 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
 
     save_as_nib(os.path.join(work_path, "imj.nii"), xr)
 
-
-
-    # vol_1 = vd.Volume(xr).isosurface(isolevel)
     vol_1 = vd.Volume(xr).isosurface(isolevel).smooth()
     scale = 1/resolution*2
     vol_1 = vol_1.shift(-shift, -shift, -shift).scale(scale, scale, scale).rotate_x(180).rotate_y(-90).rotate_z(90)
 
     os.makedirs(os.path.join(work_path, "seg"), exist_ok=True)
 
-    # !!! 整体进行分割
-    vol_1.write(os.path.join(work_path, "seg", "vol_1.obj"))
-
-    # !!! 分别进行分割
+    # !!! Perform separate segmentation
     # vols_1 = vol_1.split()
     # count = 1
     # for vol in vols_1:
     #     vol.write(work_path + 'seg/vol_1_%d.obj' % (count))
     #     count+=1
 
-    # !!! 直接isosurfaces还原，不需要分割
+    # !!! Direct isosurface restoration, no segmentation needed
     # vol_2 = vd.Volume(data_ori).isosurface(isolevel - 0.003)
     # scale = 1/resolution*2
     # vol_2 = vol_2.shift(-shift, -shift, -shift).scale(scale, scale, scale).rotate_x(180).rotate_y(-90).rotate_z(90)
-    # vol_2.write('/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/vol_2.obj')
+    # vol_2.write('/Users/path/to/vol_2.obj')
 
     # ori = vd.Mesh(work_path + "squirrel.obj")
 
     #region houdini
     import subprocess
-
-    # inputFolder = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/vol_1.obj"
     
     os.makedirs(os.path.join(work_path, "out"), exist_ok=True) 
     os.makedirs(os.path.join(work_path, "objs"), exist_ok=True) 
     outputFolder = os.path.join(work_path, "out/*.obj")
-    # objFile = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
 
     source_runtime_path = config['source_runtime_path']
     houdini_path = config['houdini_path']
@@ -175,18 +166,10 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
     file_path = os.path.join(source_runtime_path, "MeshBoolean/houdini_process.py")
     python_path = houdini_path
 
-    # subprocess.Popen('shell  ../houdini_process.py', shell=True)
-
     args = (python_path, file_path, work_path, obj_path)
-    #Or just:
-    #args = "bin/bar -c somefile.xml -d text.txt -r aString -f anotherString".split()
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
     #endregion
-
-
-    # !!! 整体进行分割
-    # vd.show(vol_out, axes=1)
 
     import glob
     files = glob.glob(outputFolder)
@@ -203,11 +186,9 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
                 v.write(path)
                 count += 1
 
-    # vd.show(vols, axes=1)
-
 def main():
-    data_ori = get_from_nib('/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/nii/VQ-PG/test_epoch_800_ind_453-vq-poc-351-big.nii')
-    work_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/run-time/squirrel-2/"
+    data_ori = get_from_nib('/Users/path/to/test_case/test_epoch_800_ind_453-vq-poc-351-big.nii')
+    work_path = "/Users/path/to/run-time/squirrel-2/"
 
     import glob
 
@@ -219,5 +200,5 @@ def main():
         shutil.rmtree(work_path) 
         os.makedirs(work_path, exist_ok=True) 
 
-    obj_path = "/Users/yuhanghuang/Workspaces/DeepFracture-3D/pybullet/data/squirrel.obj"
+    obj_path = "/Users/path/to/squirrel.obj"
     processCagedSDFSeg(data_ori, work_path, obj_path, True, 1.0)

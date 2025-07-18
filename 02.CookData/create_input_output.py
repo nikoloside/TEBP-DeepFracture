@@ -113,18 +113,10 @@ def encode_obj_to_nii(obj_path: str, encoding_type: int = 1, grid_size: int = 12
     return combined_packed_data
 
 # Load config
-def load_config():
-    config_path = os.path.join(os.path.dirname(__file__), '..', 'config.yaml')
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-    
-    # Resolve environment variables and foundation_path references
-    foundation_path = config['foundation_path']
-    for key, value in config.items():
-        if isinstance(value, str) and '${foundation_path}' in value:
-            config[key] = value.replace('${foundation_path}', foundation_path)
-    
-    return config
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from utils_config import load_config
 
 config = load_config()
 
@@ -155,8 +147,8 @@ def normalizeSeg_sdf(s_3d):
 def main():
     maxDist = 0
     minDist = 0
-    maxValue = 0  # 初始化 maxValue
-    minValue = 0  # 初始化 minValue
+    maxValue = 0  # Initialize maxValue
+    minValue = 0  # Initialize minValue
     startTime = datetime.datetime.now()
 
     projectList = [config['shape_category']]

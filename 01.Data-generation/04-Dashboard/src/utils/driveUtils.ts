@@ -8,7 +8,7 @@ interface StatusData {
 
 export async function fetchStatusData(fileid: string): Promise<StatusData> {
   try {
-    // 修改 API 路径
+    // Modify API path
     const response = await fetch(`/api/status/file?fileid=${encodeURIComponent(fileid)}`);
     const text = await response.text();
     

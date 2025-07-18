@@ -5,10 +5,13 @@ import pandas as pd
 import shutil
 
 # Load the config.yaml
-with open('../../config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from utils_config import load_config, get_shape_category
 
-shape_category = config.get('shape_category')
+config = load_config()
+shape_category = get_shape_category()
 data_path = config.get('data_path')
 
 # Load the OBJ files

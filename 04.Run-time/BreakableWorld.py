@@ -15,20 +15,17 @@ class BreakableWorld():
         self.BreakableList = []  # Move to instance variable
         # datapath = pybullet_data.getDataPath()
         # p.setAdditionalSearchPath(datapath) #optionally
-        # 环境设置
+        # Environment setup
         # p.setGravity(0,-10,0)
         self.nonPhysicsClient = -1
 
-        # GUI 添加
+        # GUI setup
         if (not isDirect):
             self.physicsClient = p.connect(p.GUI)
         else:
             self.physicsClient = p.connect(p.DIRECT)
         if (bulletFile != ""):
-            # Project Import 设定
-            # initialScene = "initialBullet/bunny_no_gravity.bullet"
-            # initialScene = bulletFile
-            # 重新构建，不通过Bullet
+            # Rebuild without using Bullet
             ids = p.loadBullet(bulletFile)
         
         p.setTimeStep(1 / 250, self.physicsClient)
@@ -105,11 +102,11 @@ class BreakableWorld():
                     return
                 last_play_value = play_value
 
-                # オイラー角からクォータニオンを取得
+                # Get quaternion from Euler angles
                 orn = p.getQuaternionFromEuler([roll, pitch, yaw])
                 lVel = [float(vx), float(vy), float(vz)]
                 
-                # 指定した「位置/姿勢」にロボットを設定
+                # Set robot to specified "position/orientation"
                 if len(self.BreakableList) > objectIndex:
                     self.BreakableList[objectIndex].setOriginPos([x,y,z], orn)
                     self.BreakableList[objectIndex].setLastVel(lVel, self.BreakableList[objectIndex].lastAVel)
@@ -120,7 +117,7 @@ class BreakableWorld():
             time.sleep(1./240.)
 
     def SetCamera(self, cameraDist, cameraPitch):
-        # Render 设定
+        # Render settings
         # camTargetPos = [0, 0, 0]
         # camDistance = cameraDist # 4
         # pitch = cameraPitch # -10.0
@@ -167,12 +164,12 @@ class BreakableWorld():
             print(bodyList)
             print(totalImpulseList)
             for i in range(len(totalImpulseList)):
-                # 所有的 不是 static 的 breakable List 都会过一遍threshold
+                # All non-static breakable objects in the list will go through threshold
                 # print(self.BreakableList[i].name, self.BreakableList[i].isStatic())
                 if self.BreakableList[i].isStatic():
                     continue
                 if totalImpulseList[i] > self.threshold:
-                    # 如果破坏可能的物体在列表里面，开始 Fire Fracturable Target
+                    # If breakable object is in the list, start Fire Fracturable Target
                     body_tar = bodyList[i]
                     if (bid_tar > -1 and body_tar == bid_tar) or (bid_tar < 0):
                         print("fire", body_tar)
@@ -199,7 +196,7 @@ class BreakableWorld():
         
         for breakable in self.BreakableList:
             if not breakable.isStatic and breakable.oriObj.active:
-                # 保存 1 or 2 frame 前的速度
+                # Save velocity from 1 or 2 frames ago
                 linearVelocity, angularVelocity = p.getBaseVelocity(self.BreakableList[i].oriObj.bid)
                 self.BreakableList[i].setLastVel(linearVelocity, angularVelocity)
                 

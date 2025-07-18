@@ -3,9 +3,11 @@ import os, glob
 import subprocess
 import igl
 import yaml
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from utils_config import load_config, get_shape_category
 
-with open('../../config.yaml', 'r') as file:
-    config = yaml.safe_load(file)
+config = load_config()
 
 metaPath = os.path.join(config['data_path'], config['shape_category'], "output.txt")
 fromPath = os.path.join(config['data_path'], config['shape_category'], "objs")
