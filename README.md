@@ -250,6 +250,7 @@ bash 05.Measure/Graphs/auto-run-time.py
 ## Acknowledgements
 
 - The fracture code is created by [FractureRB](https://github.com/david-hahn/FractureRB). 
+- Thaks for @fangsunjian 's warmly helping and debugging.
 
 ## Citation
 
