@@ -146,7 +146,7 @@ def main():
         print("\n📥 Downloading run-time files...")
         runtime_path = os.path.join(foundation_path, "data/run-time")
         
-        runtime_url = "https://univtokyo-my.sharepoint.com/personal/7553042866_utac_u-tokyo_ac_jp/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2F7553042866%5Futac%5Fu%2Dtokyo%5Fac%5Fjp%2FDocuments%2FShare%2Dmodel%26data%2Frun%2Dtime%2Ezip"
+        runtime_url = "https://univtokyo-my.sharepoint.com/personal/7553042866_utac_u-tokyo_ac_jp/_layouts/15/download.aspx?UniqueId=532d8eb0%2Da9ab%2D4e88%2Dab06%2D5e40ae6dbbf9"
         if runtime_url != "link":
             download_and_extract(runtime_url, runtime_path, "run-time.zip")
         else:
