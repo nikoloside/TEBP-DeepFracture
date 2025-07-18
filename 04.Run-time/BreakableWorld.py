@@ -1,5 +1,4 @@
 import pybullet as p
-import pybullet_data
 import time, os
 import numpy as np
 from DynamicObject import DynamicObject, BreakableObject

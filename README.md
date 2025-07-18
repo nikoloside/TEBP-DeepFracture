@@ -21,7 +21,7 @@
   <table align="center">
     <tr>
     <td>
-      <img src="teaser.jpg">
+      <img src="images/teaser.jpg">
     </td>
     </tr>
   </table>
@@ -78,42 +78,65 @@ Before installing the main dependencies, you need to build the following third-p
    - Clone the repository: `git clone https://github.com/elalish/manifold.git`
    - Follow the build instructions in the repository
 
+2. **PyBullet3**
+  - Clone the repository: `git clone https://github.com/bulletphysics/bullet3.git`
+  
+```sh
+cd bullet3
+mkdir build
+cd build
+cmake -DBUILD_PYBULLET=ON ..
+make -j$(sysctl -n hw.logicalcpu)
+cd ./examples/pybullet
+mkdir -p $(python3 -m site --user-site)
+cp pybullet.so $(python3 -m site --user-site)/pybullet.so
+```
 
-2. **For MacOS**
+3. **PyTorch & JVM**
+
+- **For MacOS**
+
+Verified:
+MacOS: Macbook Air Apple M2, Mac Studio Apple M4
+Python: 3.10.17
+numpy=1.26.4
+openjdk version "24.0.1"
+
 ```bash
 pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
 brew install --cask temurin
+export JAVA_HOME=$(/usr/libexec/java_home)
 ```
 
-3. **For Ubuntu**
+- **For Ubuntu**
+
+**[Verifed]**
+Ubuntu: 24.04.2 LTS: Intel® Core™ i7-9700 × 8, NVIDIA GeForce RTX™ 2080
+Python: 3.11.4
+numpy: 1.26.4
+openjdk version: "21.0.7"
 
 Please follow the [Pytorch Ubuntu Link](https://pytorch.org/get-started/locally/) for the nightly cuda installation.
 
 ```bash
 pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
-sudo apt-get install temurin-21-jdk
 ```
 
+4. Others
 
 After building these libraries, proceed with the main installation:
 
 ```bash
-conda env create -f environment.yml
-conda activate tebp
-pip install -r requirements.txt --no-cache-dir
+pip install -r requirements.txt
 ```
 
-Generate config.yaml for quick run-time
+Generate config.yaml for quick run-time:
 
 ```bash
-python create_config.py with_runtime
+python create_config.py
 ```
 
-Generate config.yaml for full training
-
-```bash
-python create_config.py with_runtime with_dataset
-```
+Manually download [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and unzip as "TEBP/data/run-time/".
 
 ## Generating
 
@@ -205,13 +228,21 @@ python 04.Run-time/predict-runtime.py
 
 By following these instructions, you can effectively utilize the DeepFracture code base to explore run-time code.
 
-![Image Description](images/image.png)
+![How-to-run](images/tutorial.png)
+
+For predicting fragments, turn the "isFracturingOrSaving = True".
+For gnerating obj animation sequences, turn the "isFracturingOrSaving = False".
+
+```python
+isFracturingOrSaving = True
+
+world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = not isFracturingOrSaving, allowAutoFracture = isFracturingOrSaving, timeRange = 20, hasGravity = False, collisionNum = collisionNum, impulseMax = impulseMax)
+```
 
 
 ## Acknowledgements
 
 - The fracture code is created by [FractureRB](https://github.com/david-hahn/FractureRB). 
-
 
 ## Citation
 
@@ -232,7 +263,7 @@ If you found this code or paper useful, please consider citing:
 
 ## Contact
 
-If you encounter any issues or have questions, please open an issue or reach out to `nikoloside@gmail.com`. 
+If you encounter any issues or have questions, please open an issue or reach out to `nikoloside[at]gmail[dot]com`. 
 Additionally, we do not have permission to release any code or built versions related to HyenaLib and FractureRB. Please contact the original providers of HyenaLib or FractureRB for further assistance.
 
 Nonetheless, we utilized Docker to create an Ubuntu 14 environment and built the wrapper code for HyenaLib using the prebuilt g++-4.9 provided in FractureRB.

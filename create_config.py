@@ -5,18 +5,11 @@ TEBP Configuration Setup Script
 This script sets up the TEBP project structure and generates config.yaml.
 Usage:
     python create_config.py                    # Basic setup
-    python create_config.py with_runtime       # Setup with runtime download
-    python create_config.py with_data          # Setup with dataset download
-    python create_config.py with_runtime with_data  # Setup with both downloads
 """
 
 import os
-import sys
-import yaml
 import zipfile
 import urllib.request
-from pathlib import Path
-import shutil
 
 def get_current_path():
     """Get the current working directory as foundation_path"""
@@ -141,44 +134,17 @@ def main():
     print("\n📁 Creating folders...")
     create_folders(foundation_path)
     
-    # 3. Handle with_runtime argument
-    if len(sys.argv) > 1 and "with_runtime" in sys.argv:
-        print("\n📥 Downloading run-time files...")
-        runtime_path = os.path.join(foundation_path, "data/run-time")
-        
-        runtime_url = "https://univtokyo-my.sharepoint.com/personal/7553042866_utac_u-tokyo_ac_jp/_layouts/15/download.aspx?UniqueId=532d8eb0%2Da9ab%2D4e88%2Dab06%2D5e40ae6dbbf9"
-        if runtime_url != "link":
-            download_and_extract(runtime_url, runtime_path, "run-time.zip")
-        else:
-            print("⚠️  Please replace 'link' with actual download URL for run-time.zip")
-    else:
-        print("\n⏭️  Skipping runtime download (use 'with_runtime' flag to download)")
-    
-    # 4. Handle with_data argument
-    if len(sys.argv) > 1 and "with_data" in sys.argv:
-        print("\n📥 Downloading dataset files...")
-        dataset_path = os.path.join(foundation_path, "data/dataset")
-        
-        dataset_url = "https://univtokyo-my.sharepoint.com/personal/7553042866_utac_u-tokyo_ac_jp/_layouts/15/download.aspx?UniqueId=e317f88c%2D3c79%2D4ffc%2D94e7%2D24a623cd476a"
-        if dataset_url != "link_2":
-            download_and_extract(dataset_url, dataset_path)
-        else:
-            print("⚠️  Please replace 'link_2' with actual download URL for dataset")
-    
-    # 5. Generate config.yaml
+    # 3. Generate config.yaml
     print("\n⚙️  Generating config.yaml...")
     generate_config_yaml(foundation_path)
     
     print("\n✅ Setup complete!")
     print("\nNext steps:")
-    print("1. Replace 'link' and 'link_2' with actual download URLs")
-    print("2. Update config.yaml paths if needed")
-    print("3. Install required dependencies")
+    print("1. Manually download run-time.zip and dataset.zip from OneDrive")
+    print("2. Unzip run-time.zip and dataset.zip to TEBP/data/run-time/ and TEBP/data/dataset/")
+    print("3. Update config.yaml paths if needed")
     print("\nUsage examples:")
     print("  python create_config.py                    # Basic setup")
-    print("  python create_config.py with_runtime       # Setup with runtime download")
-    print("  python create_config.py with_data          # Setup with dataset download")
-    print("  python create_config.py with_runtime with_data  # Setup with both downloads")
 
 if __name__ == "__main__":
     main()

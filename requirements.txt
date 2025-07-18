@@ -1,7 +1,7 @@
 # requirements.txt 
 wandb
 vedo
-numpy < 2.0.0
+numpy==1.26.4
 scipy
 scikit-image
 scikit-learn
@@ -9,7 +9,6 @@ siren-pytorch
 nibabel
 torch
 torchvision
-pybullet==3.2.6
 pyyaml
 tqdm
 imagej
@@ -17,6 +16,6 @@ trimesh
 h5py
 matplotlib
 libigl
-
+manifold3d
 
 

@@ -4,3 +4,6 @@
 [submodule "00.third-party/Manifold"]
 	path = 00.third-party/Manifold
 	url = https://github.com/hjwdzh/Manifold
+[submodule "00.third-party/bullet3"]
+	path = 00.third-party/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
