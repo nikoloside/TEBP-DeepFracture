@@ -68,12 +68,13 @@ class BreakableWorld():
             print(f"Error setting up debug parameters: {e}")
             return False
 
-    def Idle(self):
+    def Idle(self, auto_run=False):
         if not hasattr(self, 'debug_params'):
             print("Debug parameters not initialized. Call SetupDebugPage first.")
             return
             
         last_play_value = 0
+        auto_run_triggered = False
         while True:
             try:
                 objectIndex = 1
@@ -91,6 +92,12 @@ class BreakableWorld():
                 
                 # Check if play value changed from 0 to something else
                 play_value = p.readUserDebugParameter(self.debug_params['play'])
+                
+                # Auto-run logic: set play to 1 on first iteration if auto_run is True
+                if auto_run and not auto_run_triggered:
+                    auto_run_triggered = True
+                    return
+                
                 if play_value > 0 and last_play_value == 0:
                     return
                 last_play_value = play_value

@@ -27,6 +27,7 @@ csvNum=260
 
 modelShape = "bunny"
 modelName = "cgf/"
+auto_run=False
 
 projectName = shape + "/"
 target = shape
@@ -99,7 +100,7 @@ for i in range(len(Lines)):
 # Now that objects are created, set up debug page
 if world.SetupDebugPage():
     print("Debug page setup successful, entering idle mode...")
-    world.Idle()
+    world.Idle(auto_run)
 else:
     print("Failed to setup debug page, proceeding without debug interface...")
 

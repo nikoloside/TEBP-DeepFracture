@@ -121,6 +121,120 @@ def generate_config_yaml(foundation_path):
     
     print(f"✓ Generated config.yaml at: {config_path}")
 
+def install_bullet3(foundation_path):
+    """Install Bullet3 with PyBullet support"""
+    import subprocess
+    import sys
+    
+    bullet_path = os.path.join(foundation_path, "00.third-party", "bullet3")
+    build_path = os.path.join(bullet_path, "build")
+    
+    print("\n🔧 Installing Bullet3...")
+    
+    try:
+        # Create build directory
+        print("Creating build directory...")
+        os.makedirs(build_path, exist_ok=True)
+        print(f"✓ Created build directory: {build_path}")
+        
+        # Change to build directory
+        os.chdir(build_path)
+        print(f"✓ Changed to build directory: {build_path}")
+        
+        # Run cmake
+        print("Running cmake...")
+        result = subprocess.run(["cmake", "-DBUILD_PYBULLET=ON", ".."], 
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✓ CMake configuration successful")
+            print(result.stdout)
+        else:
+            print("✗ CMake configuration failed")
+            print(result.stderr)
+            return False
+        
+        # Run make
+        print("Running make...")
+        cpu_count = subprocess.run(["sysctl", "-n", "hw.logicalcpu"], 
+                                 capture_output=True, text=True).stdout.strip()
+        result = subprocess.run(["make", "-j", cpu_count], 
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print("✓ Make build successful")
+            print(result.stdout)
+        else:
+            print("✗ Make build failed")
+            print(result.stderr)
+            return False
+        
+        # Install PyBullet
+        pybullet_path = os.path.join(build_path, "examples", "pybullet")
+        if os.path.exists(pybullet_path):
+            os.chdir(pybullet_path)
+            print(f"✓ Changed to pybullet directory: {pybullet_path}")
+            
+            # Get Python site-packages directory
+            result = subprocess.run([sys.executable, "-m", "site", "--user-site"], 
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                site_packages = result.stdout.strip()
+                os.makedirs(site_packages, exist_ok=True)
+                print(f"✓ Created site-packages directory: {site_packages}")
+                
+                # Copy pybullet.so
+                pybullet_so = os.path.join(pybullet_path, "pybullet.so")
+                if os.path.exists(pybullet_so):
+                    import shutil
+                    shutil.copy2(pybullet_so, site_packages)
+                    print(f"✓ Copied pybullet.so to: {site_packages}")
+                else:
+                    print(f"✗ pybullet.so not found at: {pybullet_so}")
+                    return False
+            else:
+                print("✗ Failed to get Python site-packages directory")
+                return False
+        else:
+            print(f"✗ PyBullet directory not found: {pybullet_path}")
+            return False
+        
+        print("✓ Bullet3 installation completed successfully!")
+        return True
+        
+    except Exception as e:
+        print(f"✗ Error during Bullet3 installation: {e}")
+        return False
+
+def install_requirements(foundation_path):
+    """Install Python requirements from requirements.txt"""
+    import subprocess
+    
+    requirements_path = os.path.join(foundation_path, "requirements.txt")
+    
+    print("\n📦 Installing Python requirements...")
+    
+    if not os.path.exists(requirements_path):
+        print(f"✗ requirements.txt not found at: {requirements_path}")
+        return False
+    
+    try:
+        print(f"Installing from: {requirements_path}")
+        result = subprocess.run(["pip", "install", "-r", requirements_path], 
+                              capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print("✓ Python requirements installed successfully!")
+            print(result.stdout)
+        else:
+            print("✗ Failed to install Python requirements")
+            print(result.stderr)
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Error installing Python requirements: {e}")
+        return False
+
 def main():
     """Main function"""
     print("🚀 TEBP Configuration Setup")
@@ -137,6 +251,12 @@ def main():
     # 3. Generate config.yaml
     print("\n⚙️  Generating config.yaml...")
     generate_config_yaml(foundation_path)
+    
+    # 4. Install Python requirements
+    install_requirements(foundation_path)
+    
+    # 5. Install Bullet3
+    install_bullet3(foundation_path)
     
     print("\n✅ Setup complete!")
     print("\nNext steps:")

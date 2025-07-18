@@ -1,0 +1,42 @@
+# Predict Runtime Configuration
+# Common parameter combinations for different shapes and CSV numbers
+
+# Available shapes from maxValues dictionary
+available_shapes:
+  - squirrel
+  - bunny
+  - base
+  - pot
+
+# Common CSV number ranges for different shapes
+csv_ranges:
+  bunny: [260]
+  squirrel: [260]
+  pot: [79]
+  base: [261]
+
+# Predefined batch configurations
+batch_configs:
+  # Test all shapes with a single CSV number
+  all_shapes_single_csv:
+    shapes: [bunny, squirrel]
+    csv_numbers: [260]
+    description: "Test all shapes with CSV number 260"
+  
+  # Test bunny with multiple CSV numbers
+  bunny_multiple_csv:
+    shapes: [bunny]
+    csv_numbers: [260, 261]
+    description: "Test bunny with CSV numbers 260-264"
+  
+  # Test multiple shapes with multiple CSV numbers
+  comprehensive_test:
+    shapes: [bunny, squirrel]
+    csv_numbers: [260, 261]
+    description: "Comprehensive test with 3 shapes and 3 CSV numbers"
+
+# Default settings
+defaults:
+  shape: bunny
+  csv_num: 260
+  model_shape: bunny 

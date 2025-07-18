@@ -82,7 +82,7 @@ Before installing the main dependencies, you need to build the following third-p
   - Clone the repository: `git clone https://github.com/bulletphysics/bullet3.git`
   
 ```sh
-cd bullet3
+cd 00.third-party/bullet3
 mkdir build
 cd build
 cmake -DBUILD_PYBULLET=ON ..
@@ -133,7 +133,7 @@ pip install -r requirements.txt
 Generate config.yaml for quick run-time:
 
 ```bash
-python create_config.py
+python setup.py
 ```
 
 Manually download [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and unzip as "TEBP/data/run-time/".
@@ -239,6 +239,13 @@ isFracturingOrSaving = True
 world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = not isFracturingOrSaving, allowAutoFracture = isFracturingOrSaving, timeRange = 20, hasGravity = False, collisionNum = collisionNum, impulseMax = impulseMax)
 ```
 
+### Auto-Run
+
+Please use it for auto run all tests.
+
+```bash
+bash 05.Measure/Graphs/auto-run-time.py
+```
 
 ## Acknowledgements
 
