@@ -1,5 +1,3 @@
-
-import imagej
 import os
 import numpy as np
 import nibabel as nib
@@ -44,9 +42,28 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
 
     config = load_config()
     sourcePath = config["fiji_path"]
+    
+    # Check if Fiji path exists
+    if not os.path.exists(sourcePath):
+        error_msg = f"Fiji path does not exist: {sourcePath}"
+        print(f"ERROR: {error_msg}")
+        raise FileNotFoundError(error_msg)
+    
     #region Import section
-    ij = imagej.init(sourcePath, mode="headless")
-    print(ij.getVersion())
+    try:
+        import imagej
+    except ImportError as e:
+        error_msg = f"ImageJ Python module not found. Please install it with: pip install imagej\nError: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        raise ImportError(error_msg)
+    
+    try:
+        ij = imagej.init(sourcePath, mode="headless")
+        print(f"ImageJ initialized successfully. Version: {ij.getVersion()}")
+    except Exception as e:
+        error_msg = f"Failed to initialize ImageJ with path: {sourcePath}\nError: {str(e)}"
+        print(f"ERROR: {error_msg}")
+        raise RuntimeError(error_msg)
 
     if isBig == 2:
         isolevel = 0.03 / maxValue
@@ -115,8 +132,14 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
     """
     imp = ij.py.to_imageplus(dataset)
     args = {"imp": imp}
+    import time
+    time_start = time.time()
     result = ij.py.run_script("BeanShell", script, args)
     resultImp = result.getOutput("resultImage")
+    time_end = time.time()
+    with open(os.path.join(work_path, "log-FloodSeg.txt"), "a") as log_file:
+        log_file.write(f"Segmentation Process time: {time_end - time_start:.2f} seconds\n")
+
 
     xr = ij.py.from_java(resultImp)
 
@@ -137,6 +160,7 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
     vol_1 = vol_1.shift(-shift, -shift, -shift).scale(scale, scale, scale).rotate_x(180).rotate_y(-90).rotate_z(90)
 
     os.makedirs(os.path.join(work_path, "seg"), exist_ok=True)
+    vol_1.write(os.path.join(work_path, "seg/vol_1.obj"))
 
     # !!! Perform separate segmentation
     # vols_1 = vol_1.split()
@@ -153,38 +177,115 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
 
     # ori = vd.Mesh(work_path + "squirrel.obj")
 
-    #region houdini
-    import subprocess
-    
     os.makedirs(os.path.join(work_path, "out"), exist_ok=True) 
     os.makedirs(os.path.join(work_path, "objs"), exist_ok=True) 
     outputFolder = os.path.join(work_path, "out/*.obj")
 
     source_runtime_path = config['source_runtime_path']
-    houdini_path = config['houdini_path']
     
-    file_path = os.path.join(source_runtime_path, "MeshBoolean/houdini_process.py")
-    python_path = houdini_path
+    if config['use_houdini']:
+        #region python
+        from MeshBoolean.pyMeshBool import process_mesh_split_boolean
+        import glob
+        inputFolder = os.path.join(work_path, "seg/*.obj")
+        files = glob.glob(inputFolder)
+        if len(files) == 0:
+            raise FileNotFoundError("Error: No files found in the seg folder.")
+        input_obj_a = files[0]
+        input_obj_b = obj_path
+        output_dir = os.path.join(work_path, "objs")
+        process_mesh_split_boolean(
+            input_obj_a, input_obj_b, output_dir, min_meshes, use_parallel = False
+        )
+        
+        #endregion
+    else:
+        #region houdini
+        import subprocess
+        
+        houdini_path = config['houdini_path']
+        
+        # Check if Houdini path exists
+        if not os.path.exists(houdini_path):
+            error_msg = f"Houdini path does not exist: {houdini_path}"
+            print(f"ERROR: {error_msg}")
+            raise FileNotFoundError(error_msg)
+        
+        # Check if Houdini Python executable is actually executable
+        if not os.access(houdini_path, os.X_OK):
+            error_msg = f"Houdini path is not executable: {houdini_path}"
+            print(f"ERROR: {error_msg}")
+            raise PermissionError(error_msg)
+        
+        file_path = os.path.join(source_runtime_path, "MeshBoolean/houdini_process.py")
+        python_path = houdini_path
 
-    args = (python_path, file_path, work_path, obj_path)
-    popen = subprocess.Popen(args, stdout=subprocess.PIPE)
-    popen.wait()
-    #endregion
+        # Check if Houdini process file exists
+        if not os.path.exists(file_path):
+            error_msg = f"Houdini process file does not exist: {file_path}"
+            print(f"ERROR: {error_msg}")
+            raise FileNotFoundError(error_msg)
 
-    import glob
-    files = glob.glob(outputFolder)
-    vols = []
-    count = 1
-    for file in files:
-        vol = vd.Mesh(file).split()
-        print(len(vol))
-        vols.append(vol)
-        for v in vol:
-            if len(v.cells) >= min_meshes:
-                path = os.path.join(work_path, "objs/vol_%d.obj" % (count))
-                print(path)
-                v.write(path)
-                count += 1
+        # Check if input obj file exists
+        if not os.path.exists(obj_path):
+            error_msg = f"Input obj file does not exist: {obj_path}"
+            print(f"ERROR: {error_msg}")
+            raise FileNotFoundError(error_msg)
+
+        print("Start Houdini process: ", python_path, file_path, work_path, obj_path)
+        args = (python_path, file_path, work_path, obj_path)
+        
+        try:
+            # Run Houdini process with timeout and capture output
+            result = subprocess.run(args, 
+                                stdout=subprocess.PIPE, 
+                                stderr=subprocess.PIPE, 
+                                text=True, 
+                                timeout=300)  # 5 minute timeout
+            
+            if result.returncode != 0:
+                error_msg = f"Houdini process failed with return code {result.returncode}\n"
+                error_msg += f"STDOUT: {result.stdout}\n"
+                error_msg += f"STDERR: {result.stderr}"
+                print(f"ERROR: {error_msg}")
+                raise RuntimeError(error_msg)
+            else:
+                print("Houdini process completed successfully")
+                if result.stdout:
+                    print("Houdini output:", result.stdout)
+                
+        except subprocess.TimeoutExpired:
+            error_msg = "Houdini process timed out after 5 minutes"
+            print(f"ERROR: {error_msg}")
+            raise RuntimeError(error_msg)
+        except Exception as e:
+            error_msg = f"Houdini process failed: {str(e)}"
+            print(f"ERROR: {error_msg}")
+            raise RuntimeError(error_msg)
+        #endregion
+
+        import glob
+        files = glob.glob(outputFolder)
+        
+        # Check if no files were found
+        if len(files) == 0:
+            error_msg = f"No output files found in: {outputFolder}"
+            print(f"ERROR: {error_msg}")
+            raise RuntimeError(error_msg)
+        
+        print(f"Found {len(files)} output files to process")
+        vols = []
+        count = 1
+        for file in files:
+            vol = vd.Mesh(file).split()
+            print(len(vol))
+            vols.append(vol)
+            for v in vol:
+                if len(v.cells) >= min_meshes:
+                    path = os.path.join(work_path, "objs/vol_%d.obj" % (count))
+                    print(path)
+                    v.write(path)
+                    count += 1
 
 def main():
     data_ori = get_from_nib('/Users/path/to/test_case/test_epoch_800_ind_453-vq-poc-351-big.nii')

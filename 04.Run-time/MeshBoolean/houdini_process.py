@@ -11,7 +11,7 @@ sys.path.append(houdini_path)
 
 import hou
 
-print(hou.applicationVersionString())
+print("Houdini version: ", hou.applicationVersionString())
 
 import hrpyc
 import time
@@ -22,8 +22,9 @@ if sys.argv[2] != "":
     objName = sys.argv[2]
 
 
-inputFolder = os.path.join(path, "", "reconstructed.obj")
+inputFolder = os.path.join(path, "seg/*.obj")
 outputFolder = os.path.join(path, "out")
+
 objFile = objName
 logFile = os.path.join(path, "log-hou.txt")
 
@@ -41,6 +42,9 @@ print("ori obj name: %s" % (file2.parm('file').eval()))
 t1 = time.time()
 
 files = glob.glob(inputFolder)
+if len(files) == 0:
+    print("Alert: No files found in the input folder.")
+
 for filename in files:
     file1.parm("file").set(filename)
     name = file1.parm('file').eval()

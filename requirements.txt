@@ -6,12 +6,17 @@ scipy
 scikit-image
 scikit-learn
 siren-pytorch
+nibabel
 torch
 torchvision
 pybullet==3.2.6
 pyyaml
 tqdm
-
+imagej
+trimesh
+h5py
+matplotlib
+libigl
 
 
 

@@ -78,19 +78,20 @@ Before installing the main dependencies, you need to build the following third-p
    - Clone the repository: `git clone https://github.com/elalish/manifold.git`
    - Follow the build instructions in the repository
 
-pip install h5py pyyaml matplotlib libigl nibabel
 
-2. **Others**
+2. **For MacOS**
 ```bash
 pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
-pip install "numpy<2" siren_pytorch nibabel pyyaml imagej trimesh vedo
 brew install --cask temurin
 ```
 
-3. **Bullet3**
+3. **For Ubuntu**
+
+Please follow the [Pytorch Ubuntu Link](https://pytorch.org/get-started/locally/) for the nightly cuda installation.
+
 ```bash
-pip install pybullet==3.2.6
-pip install "numpy<2"
+pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+sudo apt-get install temurin-21-jdk
 ```
 
 
@@ -100,6 +101,18 @@ After building these libraries, proceed with the main installation:
 conda env create -f environment.yml
 conda activate tebp
 pip install -r requirements.txt --no-cache-dir
+```
+
+Generate config.yaml for quick run-time
+
+```bash
+python create_config.py with_runtime
+```
+
+Generate config.yaml for full training
+
+```bash
+python create_config.py with_runtime with_dataset
 ```
 
 ## Generating
@@ -114,9 +127,15 @@ We plan to provide the generated fractured datasets for all 7 categories separat
 
 ## Training
 
-Download the dataset above．
+Download the dataset above, and put the data as "./TEBP/data/dataset/_out_targetName/"
 
-```json
+- impact/*.txt
+- data/dataset/_out_target/*.txt
+- data/dataset
+
+Change the config.yaml
+
+```yaml
 # 01 Data Generation
 shape_category: "mug"
 foundation_path: "/Users/(Your Path)/TEBP"
@@ -128,7 +147,7 @@ Change the path.
 python 03.Training/train.py
 ```
 
-## Evaluation
+## Evaluation & Run-time
 
 ### Pre-trained models
 
@@ -147,18 +166,46 @@ world.CreateBreakableObj(objName, pos, rot, lVel, aVel, paths[i], colors[i], sta
 Please refer to [`predict-runtime.py`](04.Run-time/predict-runtime.py) for seeking the whole code example.
 
 
-### Run-time
+### Quick-Start Run-time
 
+Please download the [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and place the run-time.zip as "TEBP/data/" folder under TEBP.
 
-### Usage Instructions
+#### Set-up MeshBool & Config.yaml
+
+1. Option 1: We Use Houdini for measuring MeshBool officially
+
+Change your houdini path both in config.yaml and ./04.Run-time/
+
+- ./config.yaml
+```yaml
+use_houdini: True
+houdini_path: "/Applications/Houdini/Houdini20.5.584/Frameworks/Python.framework/Versions/3.11/bin/python3.11"
+houdini_libs: "/Applications/Houdini/Houdini20.5.584/Frameworks/Houdini.framework/Versions/Current/Resources/houdini/python3.11libs/"
+```
+
+- ./04.Run-time/MeshBoolean/houdini_process.py
+```python
+houdini_path = "/Applications/Houdini/Houdini20.5.584/Frameworks/Python.framework/Versions/3.11/bin/python3.11"
+houdini_libs = "/Applications/Houdini/Houdini20.5.584/Frameworks/Houdini.framework/Versions/Current/Resources/houdini/python3.11libs/"
+```
+
+2. Option 2: Use python code for starting MeshBool quickly
+
+- ./config.yaml
+```yaml
+use_houdini: False
+```
+
+#### Instructions
 
 
 ```bash
 python 04.Run-time/predict-runtime.py
 ```
 
-By following these instructions, you can effectively utilize the DeepFracture code base to explore and analyze fracture simulations.
+By following these instructions, you can effectively utilize the DeepFracture code base to explore run-time code.
 
+![Image Description](images/image.png)
 
 
 ## Acknowledgements

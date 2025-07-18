@@ -13,10 +13,6 @@ def sort_impulse(e):
 class BreakableWorld():
     def __init__(self, isDirect, bulletFile = "", needOutput = True, allowAutoFracture = False, timeRange = 60, hasGravity = 0, collisionNum=1, impulseMax = 100000):
         self.BreakableList = []  # Move to instance variable
-        # datapath = pybullet_data.getDataPath()
-        # p.setAdditionalSearchPath(datapath) #optionally
-        # Environment setup
-        # p.setGravity(0,-10,0)
         self.nonPhysicsClient = -1
 
         # GUI setup
@@ -32,12 +28,10 @@ class BreakableWorld():
         self.resultPath = ""
         self.needOutput = needOutput
         self.allowAutoFracture = allowAutoFracture
-        # self.catchedEvent = func
         self.timeRange = timeRange
         self.hasGravity = hasGravity
         self.collisionNum = collisionNum
         self.impulseMax = impulseMax
-        # self.resetGravity()
 
     def resetGravity(self):
         if self.hasGravity > 0:
@@ -118,14 +112,7 @@ class BreakableWorld():
 
     def SetCamera(self, cameraDist, cameraPitch):
         # Render settings
-        # camTargetPos = [0, 0, 0]
-        # camDistance = cameraDist # 4
-        # pitch = cameraPitch # -10.0
-
-        # roll = 0
         self.upAxisIndex = 2
-        # viewMatrix = p.computeViewMatrixFromYawPitchRoll(camTargetPos, camDistance, yaw, pitch,
-        #                                                         roll, upAxisIndex)
 
     def CreateBreakableObj(self, objName, pos, rot, lVel,aVel, path, color, staticMass, friction, restitution, fracturePath, garagePath, model, isBig, maxValue, isMulShapes, ws):
         if not self.allowAutoFracture:
@@ -151,13 +138,10 @@ class BreakableWorld():
                 totalImpulseList.append(0)
                 detailedImpulseList.append([])
 
-            # totalImpulse = 
-            # targetNum = -1
             for impact in impactList:
                 for i in range(len(self.BreakableList)):
                     if bodyList[i] == impact[1] or bodyList[i] == impact[2]: # contactFlag bodyUniqueIdA bodyUniqueIdA linkIndexA linkIndexB positionOnA positionOnB contactNormalOnB contactDistance normalForce
                         totalImpulseList[i] += impact[9]
-                    # if len(detailedImpulseList[i]) <= self.collisionNum - 1:
                     detailedImpulseList[i].append(impact)
                     sorted(detailedImpulseList[i], key=lambda x: x[9], reverse=True)
 
@@ -165,7 +149,6 @@ class BreakableWorld():
             print(totalImpulseList)
             for i in range(len(totalImpulseList)):
                 # All non-static breakable objects in the list will go through threshold
-                # print(self.BreakableList[i].name, self.BreakableList[i].isStatic())
                 if self.BreakableList[i].isStatic():
                     continue
                 if totalImpulseList[i] > self.threshold:
@@ -255,7 +238,5 @@ class BreakableWorld():
                 self.exportObjByTime(count)
             count += 1
 
-    # cubePos, cubeOrn = p.getBasePositionAndOrientation(boxId)
-    # print(cubePos,cubeOrn)
     def StopRun(self):
         p.disconnect(self.physicsClient)
