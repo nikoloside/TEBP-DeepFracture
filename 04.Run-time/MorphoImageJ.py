@@ -183,7 +183,7 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
 
     source_runtime_path = config['source_runtime_path']
     
-    if config['use_houdini']:
+    if not config['use_houdini']:
         #region python
         from MeshBoolean.pyMeshBool import process_mesh_split_boolean
         import glob

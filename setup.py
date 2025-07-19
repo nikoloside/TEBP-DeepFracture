@@ -10,6 +10,8 @@ Usage:
 import os
 import zipfile
 import urllib.request
+import platform
+import subprocess
 
 def get_current_path():
     """Get the current working directory as foundation_path"""
@@ -97,7 +99,7 @@ def generate_config_yaml(foundation_path):
         "data_runtime_workspace_path": "${foundation_path}/data/run-time/Runs/",
         "data_runtime_data_path": "${foundation_path}/data/run-time/Experiments/",
         "source_runtime_path": "${foundation_path}/04.Run-time",
-        "use_houdini": True,
+        "use_houdini": False,
         "houdini_path": "/Applications/Houdini/Houdini20.5.584/Frameworks/Python.framework/Versions/3.11/bin/python3.11",
         "houdini_libs": "/Applications/Houdini/Houdini20.5.584/Frameworks/Houdini.framework/Versions/Current/Resources/houdini/python3.11libs/"
     }
@@ -121,9 +123,116 @@ def generate_config_yaml(foundation_path):
     
     print(f"✓ Generated config.yaml at: {config_path}")
 
+def install_system_dependencies():
+    """Install system-specific dependencies (torch, temurin)"""
+    system = platform.system().lower()
+    
+    print(f"\n🔧 Installing system dependencies for {system}...")
+    
+    if system == "darwin":  # macOS
+        print("Installing PyTorch for macOS...")
+        try:
+            # Install PyTorch nightly for macOS
+            result = subprocess.run([
+                "pip3", "install", "--pre", "torch", "torchvision", "torchaudio",
+                "--extra-index-url", "https://download.pytorch.org/whl/nightly/cpu"
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✓ PyTorch installed successfully for macOS")
+                print(result.stdout)
+            else:
+                print("✗ Failed to install PyTorch for macOS")
+                print(result.stderr)
+                return False
+            
+            # Install Temurin (Java) for macOS
+            print("Installing Temurin for macOS...")
+            result = subprocess.run([
+                "brew", "install", "--cask", "temurin"
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✓ Temurin installed successfully for macOS")
+                print(result.stdout)
+                
+                # Set JAVA_HOME
+                java_home_result = subprocess.run([
+                    "/usr/libexec/java_home"
+                ], capture_output=True, text=True)
+                
+                if java_home_result.returncode == 0:
+                    java_home = java_home_result.stdout.strip()
+                    export_command = f'export JAVA_HOME={java_home}'
+                    os.system(export_command)
+                    print(f"✓ Set JAVA_HOME to: {java_home}")
+                else:
+                    print("⚠️  Could not set JAVA_HOME automatically")
+            else:
+                print("✗ Failed to install Temurin for macOS")
+                print(result.stderr)
+                return False
+                
+        except Exception as e:
+            print(f"✗ Error installing macOS dependencies: {e}")
+            return False
+            
+    elif system == "linux":
+        print("Installing PyTorch for Linux...")
+        try:
+            # Install PyTorch for Linux (CPU version)
+            result = subprocess.run([
+                "pip3", "install", "torch", "torchvision", "torchaudio", "--index-url", "https://download.pytorch.org/whl/cpu"
+            ], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✓ PyTorch installed successfully for Linux")
+                print(result.stdout)
+            else:
+                print("✗ Failed to install PyTorch for Linux")
+                print(result.stderr)
+                return False
+                
+        except Exception as e:
+            print(f"✗ Error installing Linux dependencies: {e}")
+            return False
+    
+    else:
+        print(f"⚠️  Unsupported system: {system}. Skipping system-specific dependencies.")
+    
+    return True
+
+def install_requirements(foundation_path):
+    """Install Python requirements from requirements.txt"""
+    requirements_path = os.path.join(foundation_path, "requirements.txt")
+    
+    print("\n📦 Installing Python requirements...")
+    
+    if not os.path.exists(requirements_path):
+        print(f"✗ requirements.txt not found at: {requirements_path}")
+        return False
+    
+    try:
+        print(f"Installing from: {requirements_path}")
+        result = subprocess.run(["pip", "install", "-r", requirements_path], 
+                              capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print("✓ Python requirements installed successfully!")
+            print(result.stdout)
+        else:
+            print("✗ Failed to install Python requirements")
+            print(result.stderr)
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Error installing Python requirements: {e}")
+        return False
+
 def install_bullet3(foundation_path):
     """Install Bullet3 with PyBullet support"""
-    import subprocess
     import sys
     
     bullet_path = os.path.join(foundation_path, "00.third-party", "bullet3")
@@ -155,8 +264,12 @@ def install_bullet3(foundation_path):
         
         # Run make
         print("Running make...")
-        cpu_count = subprocess.run(["sysctl", "-n", "hw.logicalcpu"], 
-                                 capture_output=True, text=True).stdout.strip()
+        if sys.platform == "darwin":  # macOS
+            cpu_count = subprocess.run(["sysctl", "-n", "hw.logicalcpu"], 
+                                       capture_output=True, text=True).stdout.strip()
+        elif sys.platform.startswith("linux"):  # Linux
+            cpu_count = subprocess.run(["nproc"], 
+                                       capture_output=True, text=True).stdout.strip()
         result = subprocess.run(["make", "-j", cpu_count], 
                               capture_output=True, text=True)
         if result.returncode == 0:
@@ -204,37 +317,6 @@ def install_bullet3(foundation_path):
         print(f"✗ Error during Bullet3 installation: {e}")
         return False
 
-def install_requirements(foundation_path):
-    """Install Python requirements from requirements.txt"""
-    import subprocess
-    
-    requirements_path = os.path.join(foundation_path, "requirements.txt")
-    
-    print("\n📦 Installing Python requirements...")
-    
-    if not os.path.exists(requirements_path):
-        print(f"✗ requirements.txt not found at: {requirements_path}")
-        return False
-    
-    try:
-        print(f"Installing from: {requirements_path}")
-        result = subprocess.run(["pip", "install", "-r", requirements_path], 
-                              capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print("✓ Python requirements installed successfully!")
-            print(result.stdout)
-        else:
-            print("✗ Failed to install Python requirements")
-            print(result.stderr)
-            return False
-        
-        return True
-        
-    except Exception as e:
-        print(f"✗ Error installing Python requirements: {e}")
-        return False
-
 def main():
     """Main function"""
     print("🚀 TEBP Configuration Setup")
@@ -252,10 +334,13 @@ def main():
     print("\n⚙️  Generating config.yaml...")
     generate_config_yaml(foundation_path)
     
-    # 4. Install Python requirements
+    # 4. Install system dependencies (torch, temurin)
+    install_system_dependencies()
+    
+    # 5. Install Python requirements
     install_requirements(foundation_path)
     
-    # 5. Install Bullet3
+    # 6. Install Bullet3
     install_bullet3(foundation_path)
     
     print("\n✅ Setup complete!")
@@ -267,4 +352,4 @@ def main():
     print("  python create_config.py                    # Basic setup")
 
 if __name__ == "__main__":
-    main()
+    main() 

@@ -70,6 +70,13 @@ This project serves as the code base for the DeepFracture and The Eye of Breakin
 
 ### Installation
 
+```sh
+git clone https://github.com/nikoloside/TEBP
+cd TEBP
+git submodule update --init --recursive 00.third-party/bullet3 00.third-party/Manifold                       ─╯
+python setup.py
+```
+
 ### Third-party Libraries
 
 Before installing the main dependencies, you need to build the following third-party libraries:
@@ -123,18 +130,6 @@ pip3 install --pre torch torchvision torchaudio --index-url https://download.pyt
 ```
 
 4. Others
-
-After building these libraries, proceed with the main installation:
-
-```bash
-pip install -r requirements.txt
-```
-
-Generate config.yaml for quick run-time:
-
-```bash
-python setup.py
-```
 
 Manually download [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and unzip as "TEBP/data/run-time/".
 

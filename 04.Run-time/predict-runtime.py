@@ -20,7 +20,7 @@ config = load_config()
 ws_data = config["data_runtime_data_path"]
 ws_workspace = config["data_runtime_workspace_path"]
 
-maxValues = {"bar": 1.1, "squirrel": 1.0, "bunny": 1.0, "base": 1.0, "lion": 1.0, "plane": 1.0, "sphere": 1.0, "static": 1.0}
+maxValues = {"bar": 1.1, "squirrel": 1.0, "bunny": 1.0, "base": 1.0, "lion": 1.0, "plane": 1.0, "sphere": 1.0, "static": 1.0, "pot": 1.0}
 
 shape = "bunny"
 csvNum=260
