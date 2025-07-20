@@ -97,9 +97,6 @@ cd ./examples/pybullet
 mkdir -p $(python3 -m site --user-site)
 cp pybullet.so $(python3 -m site --user-site)/pybullet.so
 ```
-- **For Windows**
-
-Build pybullet.vcxproj and copy the pybullet.lib to the python site-packages folder.
 
 1. **PyTorch & JVM**
 
