@@ -138,7 +138,7 @@ Manually download [OneDrive link for run-time.zip](https://univtokyo-my.sharepoi
 ### Datasets
 
 We provide the generation method of pre-fracture data. 
-However, we can not release the fracturerb code. You can find the generated 4 models data here:
+However, we can not release the FractureRB code. You can find the generated 4 models data here:
 [OneDrive link for dataset](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/EnxALyErewNMhYWeqoGSa9ABfqw45H1UWYYHVcOuLQNovw?e=caddF5)
 
 We plan to provide the generated fractured datasets for all 7 categories separately.
