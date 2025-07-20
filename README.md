@@ -225,8 +225,8 @@ By following these instructions, you can effectively utilize the DeepFracture co
 
 ![How-to-run](images/tutorial.png)
 
-For predicting fragments, turn the "isFracturingOrSaving = True".
-For gnerating obj animation sequences, turn the "isFracturingOrSaving = False".
+For predicting fragments, set "isFracturingOrSaving = True".
+For generating obj animation sequences, set "isFracturingOrSaving = False".
 
 ```python
 isFracturingOrSaving = True
@@ -245,7 +245,7 @@ bash 05.Measure/Graphs/auto-run-time.py
 ## Acknowledgements
 
 - The fracture code is created by [FractureRB](https://github.com/david-hahn/FractureRB). 
-- Thaks for @fangsunjian 's warmly helping and debugging.
+- Thanks for @fangsunjian 's warmly helping and debugging.
 
 ## Citation
 
