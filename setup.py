@@ -15,7 +15,7 @@ import subprocess
 
 def get_current_path():
     """Get the current working directory as foundation_path"""
-    return os.getcwd()
+    return os.getcwd().replace("\\", "/")
 
 def create_folders(foundation_path):
     """Create required folders"""
@@ -59,6 +59,7 @@ def download_and_extract(url, extract_path, filename=None):
 
 def generate_config_yaml(foundation_path):
     """Generate the config.yaml file"""
+    foundation_path = foundation_path.replace("\\", "/")
     config = {
         "# 01 Data Generation": None,
         "shape_category": "_out_base",
