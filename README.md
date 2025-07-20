@@ -87,7 +87,17 @@ Before installing the main dependencies, you need to build the following third-p
 
 2. **PyBullet3**
   - Clone the repository: `git clone https://github.com/bulletphysics/bullet3.git`
-  
+- **Windows**
+```sh
+cd 00.third-party/bullet3
+mkdir build
+cd build
+cmake -DBUILD_PYBULLET=ON ..
+```
+
+Build pybullet.vcxproj and copy the pybullet.dll to the python site-packages folder.
+
+- **For Other OS**
 ```sh
 cd 00.third-party/bullet3
 mkdir build
