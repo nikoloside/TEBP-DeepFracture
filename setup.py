@@ -232,14 +232,14 @@ def install_requirements(foundation_path):
         print(f"✗ Error installing Python requirements: {e}")
         return False
 
-def install_bullet3(foundation_path):
-    """Install Bullet3 with PyBullet support"""
+def build_bullet3(foundation_path):
+    """Build Bullet3 with PyBullet support"""
     import sys
     
     bullet_path = os.path.join(foundation_path, "00.third-party", "bullet3")
     build_path = os.path.join(bullet_path, "build")
     
-    print("\n🔧 Installing Bullet3...")
+    print("\n🔧 Building Bullet3...")
     
     try:
         # Create build directory
@@ -253,7 +253,7 @@ def install_bullet3(foundation_path):
         
         # Run cmake
         print("Running cmake...")
-        result = subprocess.run(["cmake", "-DBUILD_PYBULLET=ON", ".."], 
+        result = subprocess.run(["cmake", "-DBUILD_PYBULLET=ON", "..", "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"], 
                               capture_output=True, text=True)
         if result.returncode == 0:
             print("✓ CMake configuration successful")
@@ -271,6 +271,10 @@ def install_bullet3(foundation_path):
         elif sys.platform.startswith("linux"):  # Linux
             cpu_count = subprocess.run(["nproc"], 
                                        capture_output=True, text=True).stdout.strip()
+        else:
+            print("⚠️  Unsupported system for Bullet3 build. Skipping...")
+            return False
+        
         result = subprocess.run(["make", "-j", cpu_count], 
                               capture_output=True, text=True)
         if result.returncode == 0:
@@ -280,7 +284,21 @@ def install_bullet3(foundation_path):
             print("✗ Make build failed")
             print(result.stderr)
             return False
-        
+                
+    except Exception as e:
+        print(f"✗ Error during Bullet3 build: {e}")
+        return False
+    
+def copy_bullet3(foundation_path):
+    """Copy Bullet3 with PyBullet support"""
+    import sys
+    
+    bullet_path = os.path.join(foundation_path, "00.third-party", "bullet3")
+    build_path = os.path.join(bullet_path, "build")
+    
+    print("\n🔧 Copying Bullet3...")
+    
+    try:
         # Install PyBullet
         pybullet_path = os.path.join(build_path, "examples", "pybullet")
         if os.path.exists(pybullet_path):
@@ -295,15 +313,21 @@ def install_bullet3(foundation_path):
                 os.makedirs(site_packages, exist_ok=True)
                 print(f"✓ Created site-packages directory: {site_packages}")
                 
-                # Copy pybullet.so
-                pybullet_so = os.path.join(pybullet_path, "pybullet.so")
-                if os.path.exists(pybullet_so):
+                # Copy pybullet.so or pybullet.pyd
+                pybullet_bin = os.path.join(pybullet_path, "pybullet.so")
+                if os.path.exists(pybullet_bin):
                     import shutil
-                    shutil.copy2(pybullet_so, site_packages)
+                    shutil.copy2(pybullet_bin, site_packages)
                     print(f"✓ Copied pybullet.so to: {site_packages}")
                 else:
-                    print(f"✗ pybullet.so not found at: {pybullet_so}")
-                    return False
+                    pybullet_bin = os.path.join(build_path, "lib", "Release", "pybullet.pyd")
+                    if os.path.exists(pybullet_bin):
+                        import shutil
+                        shutil.copy2(pybullet_bin, site_packages)
+                        print(f"✓ Copied pybullet.pyd to: {site_packages}")
+                    else:
+                        print("✗ Failed to find pybullet.so or pybullet.pyd")
+                        return False
             else:
                 print("✗ Failed to get Python site-packages directory")
                 return False
@@ -311,12 +335,17 @@ def install_bullet3(foundation_path):
             print(f"✗ PyBullet directory not found: {pybullet_path}")
             return False
         
-        print("✓ Bullet3 installation completed successfully!")
+        print("✓ Bullet3 copy completed successfully!")
         return True
         
     except Exception as e:
-        print(f"✗ Error during Bullet3 installation: {e}")
+        print(f"✗ Error during Bullet3 copy: {e}")
         return False
+
+def install_bullet3(foundation_path):
+    """Install Bullet3 with PyBullet support"""
+    build_bullet3(foundation_path)
+    copy_bullet3(foundation_path)
 
 def main():
     """Main function"""
