@@ -97,6 +97,15 @@ cd ./examples/pybullet
 mkdir -p $(python3 -m site --user-site)
 cp pybullet.so $(python3 -m site --user-site)/pybullet.so
 ```
+- **For Windows**
+
+```sh
+cd 00.third-party/bullet3
+mkdir build
+cd build
+cmake -DBUILD_PYBULLET=ON ..
+```
+Open `00.third-party/bullet3/build/BULLET_PHYSICS.sln` and build `pybullet` project with Release configuration. Check `00.third-party/bullet3/build/lib/Release/pybullet.pyd` is generated. Run ```python setup.py``` to install or manually copy it to site-package folder.
 
 1. **PyTorch & JVM**
 
