@@ -17,5 +17,6 @@ h5py
 matplotlib
 libigl
 manifold3d
+huggingface_hub
 
 

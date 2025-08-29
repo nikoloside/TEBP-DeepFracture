@@ -135,7 +135,7 @@ def convert(v, f, typec, size=256, sizej=256j):
     x, y, z = np.mgrid[minV:maxV:sizej, minV:maxV:sizej, minV:maxV:sizej]
     positions = np.dstack([x.ravel(), y.ravel(),z.ravel()])
 
-    s, i, c = igl.signed_distance(positions.squeeze(),v,f,typec,False)
+    s = igl.signed_distance(positions.squeeze(),v,f,typec,False)[0]
 
     s_3d = s.reshape((size,size,size))
 

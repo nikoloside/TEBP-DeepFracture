@@ -35,7 +35,7 @@ def compute_sdf(obj_path, grid_size=128, grid_sizej=128j):
     grid_points = np.dstack([X.ravel(), Y.ravel(), Z.ravel()])
 
     # Compute SDF using winding number
-    S, I, C = igl.signed_distance(grid_points.squeeze(), V, F, igl.SIGNED_DISTANCE_TYPE_FAST_WINDING_NUMBER, False)
+    S = igl.signed_distance(grid_points.squeeze(), V, F, igl.SIGNED_DISTANCE_TYPE_FAST_WINDING_NUMBER, False)[0]
 
     # Reshape SDF to 3D grid
     SDF = S.reshape(grid_size, grid_size, grid_size)

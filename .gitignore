@@ -15,3 +15,4 @@ log.txt
 .python-version
 01.Data-generation/03-SimulationInstanceManager/download.tar.gz
 01.Data-generation/03-SimulationInstanceManager/config.yaml
+venv/

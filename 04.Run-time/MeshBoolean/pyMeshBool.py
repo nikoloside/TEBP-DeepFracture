@@ -42,9 +42,16 @@ def process_mesh_boolean(trimesh_a_part, trimesh_b, part_id):
                 }
         
         # Perform boolean operations
+        print(f"Part {part_id}: Performing intersection...")
         intersection = trimesh_a_part.intersection(trimesh_b)
-        # union = trimesh_a_part.union(trimesh_b)
-        # difference = trimesh_a_part.difference(trimesh_b)
+        
+        # Debug intersection result
+        if intersection is None:
+            print(f"Part {part_id}: Intersection is None - meshes may not overlap")
+        elif len(intersection.vertices) == 0:
+            print(f"Part {part_id}: Intersection has no vertices - meshes may not overlap")
+        else:
+            print(f"Part {part_id}: Intersection successful with {len(intersection.vertices)} vertices")
         
         # Collect intersection edges
         intersection_edges = []
@@ -52,6 +59,7 @@ def process_mesh_boolean(trimesh_a_part, trimesh_b, part_id):
             # Get edges from intersection mesh
             edges = intersection.edges_unique
             intersection_edges = edges.tolist()
+            print(f"Part {part_id}: Found {len(intersection_edges)} intersection edges")
         
         # Create result mesh (you can modify this based on your needs)
         # For example, using intersection as the result
@@ -147,7 +155,7 @@ def process_mesh_split_boolean(input_obj_path_a, input_obj_path_b, output_dir, m
             # Skip this part instead of adding empty trimesh
     
     # Convert mesh B to trimesh
-    vertices_b = np.array(mesh_b.vertices)
+    vertices_b = np.array(mesh_b.points)
     faces_b = np.array(mesh_b.cells)
     trimesh_b = trimesh.Trimesh(vertices=vertices_b, faces=faces_b)
     print(f"Converted mesh B to trimesh ({len(trimesh_b.faces)} faces)")
@@ -237,7 +245,11 @@ def process_mesh_split_boolean(input_obj_path_a, input_obj_path_b, output_dir, m
                 output_path = os.path.join(output_dir, f"vol_{i}.obj")
                 watertight_mesh.export(output_path)
                 final_shapes.append(watertight_mesh)
-                print(f"Saved shape C_{i:03d} to {output_path}")
+                print(f"Saved boolean result {i:03d} to {output_path}")
+            else:
+                print(f"Boolean result {i} could not be made watertight or has too few faces, skipping...")
+        else:
+            print(f"Boolean result {i} is None, skipping...")
     
 
     end_time = time.time()

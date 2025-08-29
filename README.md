@@ -13,7 +13,7 @@
         <a href="https://onlinelibrary.wiley.com/doi/10.1111/cgf.70002"><img src="https://img.shields.io/badge/Journal-CGF-blue" height=22.5 alt='journal'></a>
         <a href='https://nikoloside.graphics/deepfracture/'><img src="https://img.shields.io/badge/Project_Page-DeepFracture-red" height=22.5 alt='Project Page'></a>
         <a href='https://github.com/nikoloside/TEBP'><img src="https://img.shields.io/badge/Demo-WIP-black" height=22.5 alt='Demo'></a>
-        <a href='https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/EnxALyErewNMhYWeqoGSa9ABfqw45H1UWYYHVcOuLQNovw?e=caddF5'><img src="https://img.shields.io/badge/Dataset-break4models-yellow" height=22.5 alt='Dataset'></a>
+        <a href='https://huggingface.co/datasets/nikoloside/break4models'><img src="https://img.shields.io/badge/Dataset-break4models-yellow" height=22.5 alt='Dataset'></a>
     <br>
     <b>The University of Tokyo &nbsp;
   </p>
@@ -37,7 +37,7 @@
 - [x] Release pre-trained checkpoints.
 - [x] Release 4 Models Drive Google.
 - [x] Release Demo Codebase  (2025/7/15)
-- [ ] Release pipeline with a public license.
+- [x] Release pipeline with a public license.
 - [ ] Release Demo Page.
 - [ ] Release Evaluation Code
 
@@ -73,59 +73,71 @@ This project serves as the code base for the DeepFracture and The Eye of Breakin
 ```sh
 git clone https://github.com/nikoloside/TEBP
 cd TEBP
-git submodule update --init --recursive 00.third-party/bullet3 00.third-party/Manifold                       ─╯
+git submodule update --init --recursive 00.third-party/bullet3 00.third-party/Manifold
+
+# Install dependencies and build third-party libraries
 python setup.py
 ```
 
-### Third-party Libraries
+### Quick-Start Run-time
 
-Before installing the main dependencies, you need to build the following third-party libraries:
-
-1. **Manifold**
-   - Clone the repository: `git clone https://github.com/elalish/manifold.git`
-   - Follow the build instructions in the repository
-
-2. **PyBullet3**
-  - Clone the repository: `git clone https://github.com/bulletphysics/bullet3.git`
-```sh
-cd 00.third-party/bullet3
-mkdir build
-cd build
-cmake -DBUILD_PYBULLET=ON ..
-make -j$(sysctl -n hw.logicalcpu)
-cd ./examples/pybullet
-mkdir -p $(python3 -m site --user-site)
-cp pybullet.so $(python3 -m site --user-site)/pybullet.so
 ```
-- **For Windows**
-
-```sh
-cd 00.third-party/bullet3
-mkdir build
-cd build
-cmake -DBUILD_PYBULLET=ON ..
+python3 ./04.Run-time/predict-runtime.py --shape squirrel --csv-num 260 --auto-run
 ```
-Open `00.third-party/bullet3/build/BULLET_PHYSICS.sln` and build `pybullet` project with Release configuration. Check `00.third-party/bullet3/build/lib/Release/pybullet.pyd` is generated. Run ```python setup.py``` to install or manually copy it to site-package folder.
 
-1. **PyTorch & JVM**
+
+## Dependencies
+
+The `python setup.py` command automatically handles the installation of all required dependencies and builds third-party libraries. However, you may need to install some system dependencies manually:
+
+### System Dependencies
+
+**Java Development Kit (JDK) is required:**
+
+- **For MacOS (using Homebrew):**
+```bash
+brew install --cask temurin
+export JAVA_HOME=$(/usr/libexec/java_home)
+```
+
+- **For MacOS (using MacPorts):**
+```bash
+sudo port install openjdk24-temurin
+export JAVA_HOME=/opt/local/libexec/openjdk24.0.1
+```
+
+- **For Ubuntu:**
+```bash
+sudo apt update
+sudo apt install openjdk-21-jdk
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+```
+
+Add the JAVA_HOME export to your shell profile (`.bashrc`, `.zshrc`, or `.profile`):
+```bash
+echo 'export JAVA_HOME=/path/to/your/java' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Python Dependencies
+
+**PyTorch Installation:**
 
 - **For MacOS**
 
 Verified:
-MacOS: Macbook Air Apple M2, Mac Studio Apple M4
+MacOS: Macbook Air Apple M2, Mac Studio M3 Ultra
 Python: 3.10.17
 numpy=1.26.4
 openjdk version "24.0.1"
 
 ```bash
 pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
-brew install --cask temurin
-export JAVA_HOME=$(/usr/libexec/java_home)
 ```
 
 - **For Ubuntu**
 
-**[Verifed]**
+**[Verified]**
 Ubuntu: 24.04.2 LTS: Intel® Core™ i7-9700 × 8, NVIDIA GeForce RTX™ 2080
 Python: 3.11.4
 numpy: 1.26.4
@@ -137,17 +149,13 @@ Please follow the [Pytorch Ubuntu Link](https://pytorch.org/get-started/locally/
 pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
 ```
 
-4. Others
-
-Manually download [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and unzip as "TEBP/data/run-time/".
-
 ## Generating
 
 ### Datasets
 
 We provide the generation method of pre-fracture data. 
 However, we can not release the FractureRB code. You can find the generated 4 models data here:
-[OneDrive link for dataset](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/EnxALyErewNMhYWeqoGSa9ABfqw45H1UWYYHVcOuLQNovw?e=caddF5)
+[Hugging Face dataset](https://huggingface.co/datasets/nikoloside/break4models)
 
 We plan to provide the generated fractured datasets for all 7 categories separately.
 
@@ -177,8 +185,8 @@ python 03.Training/train.py
 
 ### Pre-trained models
 
-Pre-trained networks can be downloaded from this [OneDrive link for pretrained models](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03).
-We stored them as `*.pt` files in `pre-trained-v2.zip`.
+Pre-trained networks is downloaded in the `setup.py` as [Hugging Face model](https://huggingface.co/nikoloside/deepfracture).
+We stored them as `*.pt` files in specific folder `_out_*`.
 
 If you want to use the pre-trained model, please:
 ```python
@@ -191,10 +199,6 @@ world.CreateBreakableObj(objName, pos, rot, lVel, aVel, paths[i], colors[i], sta
 
 Please refer to [`predict-runtime.py`](04.Run-time/predict-runtime.py) for seeking the whole code example.
 
-
-### Quick-Start Run-time
-
-Please download the [OneDrive link for run-time.zip](https://univtokyo-my.sharepoint.com/:f:/g/personal/7553042866_utac_u-tokyo_ac_jp/Em4-ksMVEBFBsAIycn7i-kYBmk8f-Hu8QyGicgcQhm7vFA?e=6Ucf03) and place the run-time.zip as "TEBP/data/" folder under TEBP.
 
 #### Set-up MeshBool & Config.yaml
 
@@ -226,20 +230,40 @@ use_houdini: False
 
 
 ```bash
+# Use neural network to predict fracture patterns (default)
 python 04.Run-time/predict-runtime.py
+
+# Use existing pre-computed fracture patterns (don't predict)
+python 04.Run-time/predict-runtime.py --use_fractured_pattern
+
+# For generating obj animation sequences
+python 04.Run-time/predict-runtime.py --save-animation
+
+# For auto-run mode with neural network prediction
+python 04.Run-time/predict-runtime.py --auto-run
+
+# For specific shape with auto-run and neural network prediction
+python3 ./04.Run-time/predict-runtime.py --shape squirrel --csv-num 260 --auto-run
 ```
 
 By following these instructions, you can effectively utilize the DeepFracture code base to explore run-time code.
 
 ![How-to-run](images/tutorial.png)
 
-For predicting fragments, set "isFracturingOrSaving = True".
-For generating obj animation sequences, set "isFracturingOrSaving = False".
+**Fracture Modes:**
+- **Use neural network to predict fracture patterns**: Default behavior (no flag needed)
+- **Use existing pre-computed fracture patterns**: Use `--use_fractured_pattern` flag
+- **Generating obj animation sequences**: Use `--save-animation` flag
+- **Both using existing patterns and saving**: Use `--use_fractured_pattern --save-animation` flags
+
+**Manual Configuration:**
+You can also manually set the fracture mode in the code:
 
 ```python
-isFracturingOrSaving = True
+isFracturing = True   # Set to True to use neural network prediction, False to use existing patterns
+isSaving = False      # Set to True to save animation sequences
 
-world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = not isFracturingOrSaving, allowAutoFracture = isFracturingOrSaving, timeRange = 20, hasGravity = False, collisionNum = collisionNum, impulseMax = impulseMax)
+world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = isSaving, allowAutoFracture = isFracturing, timeRange = 20, hasGravity = False, collisionNum = collisionNum, impulseMax = impulseMax)
 ```
 
 ### Auto-Run
@@ -247,7 +271,17 @@ world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = not isFra
 Please use it for auto run all tests.
 
 ```bash
-bash 05.Measure/Graphs/auto-run-time.py
+# Make script executable
+chmod +x 05.Measure/Graphs/auto-run-time.sh
+
+# Run the script
+./05.Measure/Graphs/auto-run-time.sh
+
+# Or run individual commands
+python3 04.Run-time/predict-runtime.py --shape bunny --csv-num 260 --auto-run
+python3 04.Run-time/predict-runtime.py --shape squirrel --csv-num 260 --auto-run
+python3 04.Run-time/predict-runtime.py --shape base --csv-num 261 --auto-run
+python3 04.Run-time/predict-runtime.py --shape pot --csv-num 79 --auto-run
 ```
 
 ## Acknowledgements

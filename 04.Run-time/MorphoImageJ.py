@@ -157,7 +157,7 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
 
     vol_1 = vd.Volume(xr).isosurface(isolevel).smooth()
     scale = 1/resolution*2
-    vol_1 = vol_1.shift(-shift, -shift, -shift).scale(scale, scale, scale).rotate_x(180).rotate_y(-90).rotate_z(90)
+    vol_1 = vol_1.scale(scale).shift(-1, -1, -1).rotate_x(180).rotate_y(-90).rotate_z(90)
 
     os.makedirs(os.path.join(work_path, "seg"), exist_ok=True)
     vol_1.write(os.path.join(work_path, "seg/vol_1.obj"))
@@ -172,7 +172,7 @@ def processCagedSDFSeg(data_ori, work_path, obj_path, isBig = True, maxValue = 1
     # !!! Direct isosurface restoration, no segmentation needed
     # vol_2 = vd.Volume(data_ori).isosurface(isolevel - 0.003)
     # scale = 1/resolution*2
-    # vol_2 = vol_2.shift(-shift, -shift, -shift).scale(scale, scale, scale).rotate_x(180).rotate_y(-90).rotate_z(90)
+    # vol_2 = vol_2.shift(-shift, -shift, -shift).scale(scale).rotate_x(180).rotate_y(-90).rotate_z(90)
     # vol_2.write('/Users/path/to/vol_2.obj')
 
     # ori = vd.Mesh(work_path + "squirrel.obj")

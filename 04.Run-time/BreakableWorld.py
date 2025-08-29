@@ -61,7 +61,7 @@ class BreakableWorld():
             self.debug_params['v_z'] = p.addUserDebugParameter("v_z", -180, 180, lvel[2])
             
             # Add play button as a parameter with small range (0 to 1)
-            self.debug_params['play'] = p.addUserDebugParameter("Start Simulation", 0, 1, 0)
+            self.debug_params['play'] = p.addUserDebugParameter("Start Simulation", 1, 0, 1)
             
             return True
         except Exception as e:
