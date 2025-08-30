@@ -77,6 +77,14 @@ git submodule update --init --recursive 00.third-party/bullet3 00.third-party/Ma
 
 # Install dependencies and build third-party libraries
 python setup.py
+
+# JAVA_HOME has been added to your shell profile.
+
+# To apply the change now, reload your profile or open a new terminal:
+# - zsh:   source ~/.zshrc
+# - bash:  source ~/.bashrc   (or ~/.profile / ~/.bash_profile, depending on your setup)
+# - fish:  source ~/.config/fish/config.fish
+source ~/.zshrc
 ```
 
 ### Quick-Start Run-time

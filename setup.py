@@ -85,6 +85,13 @@ def download_and_extract(url, extract_path, filename=None):
 def generate_config_yaml(foundation_path):
     """Generate the config.yaml file"""
     foundation_path = foundation_path.replace("\\", "/")
+    
+    # Determine Fiji path based on operating system
+    if platform.system().lower() == "linux":
+        fiji_path = "${foundation_path}/data/run-time/fiji/fiji-linux64/Fiji.app"
+    else:
+        fiji_path = "${foundation_path}/data/run-time/fiji/Fiji.app"
+    
     config = {
         "# 01 Data Generation": None,
         "shape_category": "_out_base",
@@ -121,7 +128,7 @@ def generate_config_yaml(foundation_path):
         "test_dataset_size": 50,
         "": None,
         "# 04 Run-time": None,
-        "fiji_path": "${foundation_path}/data/run-time/fiji/Fiji.app",
+        "fiji_path": fiji_path,
         "data_runtime_workspace_path": "${foundation_path}/data/run-time/Runs/",
         "data_runtime_data_path": "${foundation_path}/data/run-time/Experiments/",
         "source_runtime_path": "${foundation_path}/04.Run-time",
@@ -444,55 +451,141 @@ def setup_java_home():
     """Set up JAVA_HOME environment variable"""
     print("\n☕ Setting up JAVA_HOME...")
     
-    # Try to find Java installation
+    system = platform.system().lower()
     java_home = None
     
-    # Check common Java locations
-    possible_paths = [
-        "/usr/lib/jvm/java-21-openjdk-amd64",  # Ubuntu
-        "/usr/lib/jvm/java-17-openjdk-amd64",  # Ubuntu
-        "/usr/lib/jvm/java-11-openjdk-amd64",  # Ubuntu
-        "/opt/local/libexec/openjdk24.0.1",    # MacPorts
-        "/Library/Java/JavaVirtualMachines/temurin-24.jdk/Contents/Home",  # macOS Homebrew
-        "/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home",  # macOS Homebrew
-        "/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home",  # macOS Homebrew
-    ]
+    # Check Java version first
+    try:
+        java_version_result = subprocess.run(["java", "-version"], 
+                                           capture_output=True, text=True)
+        if java_version_result.returncode == 0:
+            print("✓ Java is installed and accessible")
+            print(f"Java version output: {java_version_result.stderr.strip()}")
+        else:
+            print("⚠️  Java command failed")
+    except Exception as e:
+        print(f"⚠️  Could not run java -version: {e}")
     
-    for path in possible_paths:
-        if os.path.exists(path):
-            java_home = path
-            break
-    
-    # If not found in common locations, try /usr/libexec/java_home (macOS)
-    if not java_home and platform.system().lower() == "darwin":
+    # System-specific Java detection
+    if system == "windows":
+        print("Detected Windows system")
         try:
-            result = subprocess.run(["/usr/libexec/java_home"], 
-                                  capture_output=True, text=True)
+            # Use 'where java' to find Java executable
+            where_result = subprocess.run(["where", "java"], 
+                                        capture_output=True, text=True, shell=True)
+            if where_result.returncode == 0:
+                java_path = where_result.stdout.strip().split('\n')[0]
+                print(f"Found Java at: {java_path}")
+                # Extract JAVA_HOME from java path
+                if "bin\\java.exe" in java_path:
+                    java_home = java_path.replace("\\bin\\java.exe", "")
+                    print(f"Extracted JAVA_HOME: {java_home}")
+        except Exception as e:
+            print(f"Error finding Java on Windows: {e}")
+    
+    elif system == "darwin":
+        print("Detected macOS system")
+        try:
+            # Use /usr/libexec/java_home -V to list all Java installations
+            java_home_result = subprocess.run(["/usr/libexec/java_home", "-V"], 
+                                            capture_output=True, text=True)
+            if java_home_result.returncode == 0:
+                print("Available Java installations:")
+                print(java_home_result.stderr)  # -V outputs to stderr
+                
+                # Get the default Java home
+                default_result = subprocess.run(["/usr/libexec/java_home"], 
+                                              capture_output=True, text=True)
+                if default_result.returncode == 0:
+                    java_home = default_result.stdout.strip()
+                    print(f"Default JAVA_HOME: {java_home}")
+        except Exception as e:
+            print(f"Error finding Java on macOS: {e}")
+    
+    elif system == "linux":
+        print("Detected Linux system")
+        try:
+            # Use readlink -f to get real Java path and extract JAVA_HOME
+            cmd = "readlink -f \"$(which java)\""
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             if result.returncode == 0:
-                java_home = result.stdout.strip()
-        except:
-            pass
+                real_java_path = result.stdout.strip()
+                print(f"Real Java path: {real_java_path}")
+                
+                # Extract JAVA_HOME (remove /bin/java)
+                if "/bin/java" in real_java_path:
+                    java_home = real_java_path.replace("/bin/java", "")
+                    print(f"✓ JAVA_HOME: {java_home}")
+                else:
+                    print("✗ Could not extract JAVA_HOME")
+                    java_home = None
+            else:
+                print("✗ Failed to get Java path")
+                java_home = None
+        except Exception as e:
+            print(f"Error finding Java on Linux: {e}")
+            java_home = None
+    
+    # Fallback: Check common Java locations if system-specific detection failed
+    if not java_home:
+        print("System-specific detection failed, trying common locations...")
+        possible_paths = [
+            "/usr/lib/jvm/java-21-openjdk-amd64",  # Ubuntu
+            "/usr/lib/jvm/java-17-openjdk-amd64",  # Ubuntu
+            "/usr/lib/jvm/java-11-openjdk-amd64",  # Ubuntu
+            "/opt/local/libexec/openjdk24.0.1",    # MacPorts
+            "/Library/Java/JavaVirtualMachines/temurin-24.jdk/Contents/Home",  # macOS Homebrew
+            "/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home",  # macOS Homebrew
+            "/Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home",  # macOS Homebrew
+            "C:\\Program Files\\Java\\jdk-21",  # Windows
+            "C:\\Program Files\\Java\\jdk-17",  # Windows
+            "C:\\Program Files\\Java\\jdk-11",  # Windows
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                java_home = path
+                print(f"Found Java in common location: {java_home}")
+                break
     
     if java_home:
         print(f"✓ Found Java at: {java_home}")
-        
-        # Set JAVA_HOME for current session
-        os.environ['JAVA_HOME'] = java_home
-        print(f"✓ Set JAVA_HOME for current session: {java_home}")
         
         # Add to shell profile
         shell_profile = None
         home_dir = os.path.expanduser("~")
         
-        # Determine shell profile file
-        if os.path.exists(os.path.join(home_dir, ".zshrc")):
-            shell_profile = os.path.join(home_dir, ".zshrc")
-        elif os.path.exists(os.path.join(home_dir, ".bashrc")):
-            shell_profile = os.path.join(home_dir, ".bashrc")
-        elif os.path.exists(os.path.join(home_dir, ".bash_profile")):
-            shell_profile = os.path.join(home_dir, ".bash_profile")
-        elif os.path.exists(os.path.join(home_dir, ".profile")):
-            shell_profile = os.path.join(home_dir, ".profile")
+        # Determine shell profile file based on system
+        if system == "windows":
+            # Windows: Set environment variable
+            try:
+                import winreg
+                # Set JAVA_HOME in Windows registry
+                key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, "Environment")
+                winreg.SetValueEx(key, "JAVA_HOME", 0, winreg.REG_EXPAND_SZ, java_home)
+                winreg.CloseKey(key)
+                print(f"✓ Set JAVA_HOME in Windows registry: {java_home}")
+                
+                # Note: JAVA_HOME will be available after restart or running: refreshenv
+                print(f"✓ JAVA_HOME set in registry: {java_home}")
+                print("  Please restart your terminal or run: refreshenv")
+                return True
+            except Exception as e:
+                print(f"⚠️  Could not set JAVA_HOME in Windows registry: {e}")
+                print(f"  Please manually set: setx JAVA_HOME \"{java_home}\"")
+                return False
+        else:
+            # Unix-like systems: Use shell profile
+            if os.path.exists(os.path.join(home_dir, ".zshrc")):
+                shell_profile = os.path.join(home_dir, ".zshrc")
+            elif os.path.exists(os.path.join(home_dir, ".bashrc")):
+                shell_profile = os.path.join(home_dir, ".bashrc")
+            elif os.path.exists(os.path.join(home_dir, ".bash_profile")):
+                shell_profile = os.path.join(home_dir, ".bash_profile")
+            elif os.path.exists(os.path.join(home_dir, ".profile")):
+                shell_profile = os.path.join(home_dir, ".profile")
+            else:
+                shell_profile = None
         
         if shell_profile:
             # Check if JAVA_HOME is already set
@@ -501,6 +594,7 @@ def setup_java_home():
                     content = f.read()
                     if f'JAVA_HOME={java_home}' in content or f'JAVA_HOME="{java_home}"' in content:
                         print(f"✓ JAVA_HOME already configured in {shell_profile}")
+                        print(f"  Please run: source {shell_profile} to activate in current session")
                         return True
             except:
                 pass
@@ -511,7 +605,7 @@ def setup_java_home():
                 with open(shell_profile, 'a') as f:
                     f.write(export_line)
                 print(f"✓ Added JAVA_HOME to {shell_profile}")
-                print(f"  Please run: source {shell_profile}")
+                print(f"  Please run: source {shell_profile} to activate in current session")
                 return True
             except Exception as e:
                 print(f"⚠️  Could not write to {shell_profile}: {e}")
