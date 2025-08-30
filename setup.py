@@ -90,7 +90,7 @@ def generate_config_yaml(foundation_path):
     if platform.system().lower() == "linux":
         fiji_path = "${foundation_path}/data/run-time/fiji/fiji-linux64/Fiji.app"
     else:
-        fiji_path = "${foundation_path}/data/run-time/fiji/Fiji.app"
+        fiji_path = "${foundation_path}/data/run-time/fiji/fiji/Fiji.app"
     
     config = {
         "# 01 Data Generation": None,
