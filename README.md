@@ -7,7 +7,7 @@
   <p align="center">
     <a href="https://nikoloside.graphics/"><strong>Yuhang Huang</strong></a>
     ·
-    <a href="https://graphics.c.u-tokyo.ac.jp/hp/en/kanai"><strong>Kanai Takashi</strong></a>
+    <a href="https://graphics.c.u-tokyo.ac.jp/hp/en/kanai"><strong>Takashi Kanai</strong></a>
     <br>
     <br>
         <a href="https://onlinelibrary.wiley.com/doi/10.1111/cgf.70002"><img src="https://img.shields.io/badge/Journal-CGF-blue" height=22.5 alt='journal'></a>
@@ -16,6 +16,7 @@
         <a href='https://huggingface.co/datasets/nikoloside/break4models'><img src="https://img.shields.io/badge/Dataset-break4models-yellow" height=22.5 alt='Dataset'></a>
     <br>
     <b>The University of Tokyo &nbsp;
+    <div align="center" style="text-align: center;"><a href="http://www.replicabilitystamp.org#https-github-com-nikoloside-tebp"><img src="https://www.replicabilitystamp.org/logo/Reproducibility-tiny.png" alt="Replicability Stamp"></a><p>DeepFracture has been awarded the GRSI Replicability Stamp.</p></div>
   </p>
   
   <table align="center">
@@ -25,6 +26,7 @@
     </td>
     </tr>
   </table>
+  
 
 ## Progress
 
@@ -98,7 +100,7 @@ python3 ./04.Run-time/predict-runtime.py --shape squirrel --csv-num 260 --auto-r
 
 The `python setup.py` command automatically handles the installation of all required dependencies and builds third-party libraries. However, you may need to install some system dependencies manually:
 
-### System Dependencies
+### System Dependencies (Option, covered by setup.py)
 
 **Java Development Kit (JDK) is required:**
 
@@ -127,7 +129,7 @@ echo 'export JAVA_HOME=/path/to/your/java' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Python Dependencies
+### Python Dependencies (Option, covered by setup.py)
 
 **PyTorch Installation:**
 
@@ -157,9 +159,7 @@ Please follow the [Pytorch Ubuntu Link](https://pytorch.org/get-started/locally/
 pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
 ```
 
-## Generating
-
-### Datasets
+## Datasets
 
 We provide the generation method of pre-fracture data. 
 However, we can not release the FractureRB code. You can find the generated 4 models data here:
@@ -169,10 +169,10 @@ We plan to provide the generated fractured datasets for all 7 categories separat
 
 ## Training
 
-Download the dataset above, and put the data as "./TEBP/data/dataset/_out_targetName/"
+Download the dataset above, and put the data as "./TEBP/data/dataset/\_out_*(targetName)/"
 
 - impact/*.txt
-- data/dataset/_out_target/*.txt
+- data/dataset/_out_*(targetName)/*.txt
 - data/dataset
 
 Change the config.yaml
@@ -189,12 +189,12 @@ Change the path.
 python 03.Training/train.py
 ```
 
-## Evaluation & Run-time
+## Evaluation & Run-time (Option, Check Quick-Start Run-time)
 
 ### Pre-trained models
 
 Pre-trained networks is downloaded in the `setup.py` as [Hugging Face model](https://huggingface.co/nikoloside/deepfracture).
-We stored them as `*.pt` files in specific folder `_out_*`.
+We stored them as `*.pt` files in specific folder `*(Shape Name)`.
 
 If you want to use the pre-trained model, please:
 ```python
@@ -274,7 +274,7 @@ isSaving = False      # Set to True to save animation sequences
 world = BreakableWorld(isDirect = False, bulletFile = "", needOutput = isSaving, allowAutoFracture = isFracturing, timeRange = 20, hasGravity = False, collisionNum = collisionNum, impulseMax = impulseMax)
 ```
 
-### Auto-Run
+### Auto-Run (Option)
 
 Please use it for auto run all tests.
 
@@ -294,8 +294,9 @@ python3 04.Run-time/predict-runtime.py --shape pot --csv-num 79 --auto-run
 
 ## Acknowledgements
 
-- The fracture code is created by [FractureRB](https://github.com/david-hahn/FractureRB). 
-- Thanks for @fangsunjian 's warmly helping and debugging.
+- The fracture code was created using [FractureRB](https://github.com/david-hahn/FractureRB). 
+- Thanks to @fangsunjian for generous help with debugging.
+- Thanks to the Graphics Replicability Stamp Initiative (GRSI) for their support and thorough review.
 
 ## Citation
 
