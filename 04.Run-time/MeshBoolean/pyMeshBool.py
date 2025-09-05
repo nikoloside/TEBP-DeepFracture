@@ -139,7 +139,7 @@ def process_mesh_split_boolean(input_obj_path_a, input_obj_path_b, output_dir, m
     trimesh_a_parts = []
     for i, part in enumerate(mesh_a_parts):
         try:
-            vertices_a = np.array(part.vertices)
+            vertices_a = np.array(part.points)
             faces_a = np.array(part.cells)
             trimesh_part = trimesh.Trimesh(vertices=vertices_a, faces=faces_a)
             
