@@ -1,6 +1,6 @@
 # requirements.txt 
 wandb
-vedo
+vedo>=2024.5.1
 numpy==1.26.4
 scipy
 scikit-image
