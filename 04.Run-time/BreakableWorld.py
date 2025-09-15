@@ -98,7 +98,7 @@ class BreakableWorld():
                     auto_run_triggered = True
                     return
                 
-                if play_value > 0 and last_play_value == 0:
+                if play_value > 1 and last_play_value <= 1.5:
                     return
                 last_play_value = play_value
 
