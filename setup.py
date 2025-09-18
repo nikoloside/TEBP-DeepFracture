@@ -87,9 +87,12 @@ def generate_config_yaml(foundation_path):
     foundation_path = foundation_path.replace("\\", "/")
     
     # Determine Fiji path based on operating system
-    if platform.system().lower() == "linux":
+    system = platform.system().lower()
+    if system == "linux":
         fiji_path = "${foundation_path}/data/run-time/fiji/fiji-linux64/Fiji.app"
-    else:
+    elif system == "windows":
+        fiji_path = "${foundation_path}/data/run-time/fiji/fiji-windows/Fiji.app"
+    else:  # macOS and others
         fiji_path = "${foundation_path}/data/run-time/fiji/fiji/Fiji.app"
     
     config = {
@@ -386,6 +389,71 @@ def copy_bullet3(foundation_path):
         print(f"✗ Error during Bullet3 copy: {e}")
         return False
 
+def extract_fiji(foundation_path):
+    """Extract Fiji based on operating system"""
+    print("\n🔬 Extracting Fiji...")
+    
+    system = platform.system().lower()
+    run_time_dir = os.path.join(foundation_path, "data", "run-time")
+    
+    if system == "darwin":  # macOS
+        fiji_zip_path = os.path.join(run_time_dir, "fiji", "fiji", "Fiji.app.zip")
+        fiji_extract_path = os.path.join(run_time_dir, "fiji", "fiji")
+        
+        if os.path.exists(fiji_zip_path):
+            print(f"Extracting {fiji_zip_path}...")
+            try:
+                with zipfile.ZipFile(fiji_zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(fiji_extract_path)
+                print("✓ Fiji extracted successfully for macOS!")
+                
+                # Clean up the zip file
+                os.remove(fiji_zip_path)
+                print("✓ Cleaned up Fiji.app.zip")
+                return True
+            except Exception as e:
+                print(f"✗ Error extracting Fiji for macOS: {e}")
+                return False
+        else:
+            print(f"✗ Fiji.app.zip not found at: {fiji_zip_path}")
+            return False
+            
+    elif system == "linux":
+        fiji_zip_path = os.path.join(run_time_dir, "fiji", "fiji-linux64", "Fiji.app.zip")
+        fiji_extract_path = os.path.join(run_time_dir, "fiji", "fiji-linux64")
+        
+        if os.path.exists(fiji_zip_path):
+            print(f"Extracting {fiji_zip_path}...")
+            try:
+                with zipfile.ZipFile(fiji_zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(fiji_extract_path)
+                print("✓ Fiji extracted successfully for Linux!")
+                
+                # Clean up the zip file
+                os.remove(fiji_zip_path)
+                print("✓ Cleaned up Fiji.app.zip")
+                return True
+            except Exception as e:
+                print(f"✗ Error extracting Fiji for Linux: {e}")
+                return False
+        else:
+            print(f"✗ Fiji.app.zip not found at: {fiji_zip_path}")
+            return False
+            
+    elif system == "windows":
+        print("⚠️  Windows detected - Manual Fiji setup required")
+        print("\n📋 Please manually download and setup Fiji for Windows:")
+        print("1. Go to: https://imagej.net/Fiji/Downloads")
+        print("2. Download the Windows version of Fiji")
+        print("3. Extract it to: data/run-time/fiji/fiji-windows/")
+        print("4. Update the fiji_path in config.yaml to point to the extracted Fiji.app")
+        print("   Example: fiji_path: \"${foundation_path}/data/run-time/fiji/fiji-windows/Fiji.app\"")
+        return True
+        
+    else:
+        print(f"⚠️  Unsupported system: {system}. Skipping Fiji extraction.")
+        return False
+
 def download_huggingface_models(foundation_path):
     """Download DeepFracture model, CSV files, and OBJ files from Hugging Face"""
     print("\n🤗 Downloading DeepFracture files from Hugging Face...")
@@ -411,6 +479,10 @@ def download_huggingface_models(foundation_path):
         print("  - Models: base/, bunny/, lion/, pot/, squirrel/")
         print("  - CSV files: csv/")
         print("  - OBJ files: objs/")
+        
+        # Extract Fiji after successful download
+        extract_fiji(foundation_path)
+        
         return True
     else:
         print("⚠️  Download failed. Please check the errors above.")
@@ -685,13 +757,29 @@ def main():
         print("✓ DeepFracture files downloaded from Hugging Face")
         print("  Files available in data/run-time/")
         print("  Structure: models/, csv/, objs/")
+        system = platform.system().lower()
+        if system == "darwin":
+            print("✓ Fiji extracted for macOS")
+        elif system == "linux":
+            print("✓ Fiji extracted for Linux")
+        elif system == "windows":
+            print("⚠️  Please manually download and setup Fiji for Windows (see instructions above)")
     else:
         print("1. Download DeepFracture files manually from Hugging Face:")
         print("   - Repository: https://huggingface.co/nikoloside/deepfracture")
         print("   - Extract to data/run-time/")
         print("   - Contains: models/, csv/, objs/ folders")
-    print("2. Update config.yaml paths if needed")
-    print("3. Run: python 04.Run-time/predict-runtime.py")
+        print("2. Extract Fiji manually:")
+        system = platform.system().lower()
+        if system == "darwin":
+            print("   - Extract fiji/fiji/Fiji.app.zip")
+        elif system == "linux":
+            print("   - Extract fiji/fiji-linux64/Fiji.app.zip")
+        elif system == "windows":
+            print("   - Download Fiji from https://imagej.net/Fiji/Downloads")
+            print("   - Extract to data/run-time/fiji/fiji-windows/")
+    print("3. Update config.yaml paths if needed")
+    print("4. Run: python 04.Run-time/predict-runtime.py")
     print("\nUsage examples:")
     print("  python setup.py                           # Full setup")
     print("  python setup.py --create-venv             # Create virtual environment")
