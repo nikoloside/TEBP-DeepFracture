@@ -14,6 +14,7 @@
         <a href='https://nikoloside.graphics/deepfracture/'><img src="https://img.shields.io/badge/Project_Page-DeepFracture-red" height=22.5 alt='Project Page'></a>
         <a href='https://github.com/nikoloside/TEBP'><img src="https://img.shields.io/badge/Demo-WIP-black" height=22.5 alt='Demo'></a>
         <a href='https://huggingface.co/datasets/nikoloside/break4models'><img src="https://img.shields.io/badge/Dataset-break4models-yellow" height=22.5 alt='Dataset'></a>
+        <a href='https://github.com/nikoloside/far-from-boundary-fields'><img src="https://img.shields.io/badge/Related-Far--From--Boundary_Fields_(SMI_2026)-green" height=22.5 alt='Related project'></a>
     <br>
     <b>The University of Tokyo &nbsp;
     <div align="center" style="text-align: center;"><a href="http://www.replicabilitystamp.org#https-github-com-nikoloside-tebp"><img src="https://www.replicabilitystamp.org/logo/Reproducibility-tiny.png" alt="Replicability Stamp"></a><p>DeepFracture has been awarded the GRSI Replicability Stamp.</p></div>
