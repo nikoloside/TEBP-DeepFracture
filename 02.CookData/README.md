@@ -20,4 +20,16 @@ The final step involves combining the vector CSV files with the GS-SDF files to 
 
 By following these steps, we ensure that the Cook Data component is well-prepared for training and analysis.
 
+## FFBF mode (related paper)
+
+The `ffbdf/*.nii` outputs above are the **Far-From-Boundary Field (FFBDF)** encoding of
+the fractured solids. This is the data-cooking side of our SMI 2026 paper
+**"Far-From-Boundary Fields for Learning Segmented Implicit Solids"** (Huang & Kanai).
+The encoding is produced by `encode_obj_to_nii()` in
+[`create_input_output.py`](create_input_output.py) — use this FFBF (FFBDF) mode for that
+paper. The fractured solids themselves come from the simulation in
+[`../01.Data-generation`](../01.Data-generation).
+
+- Paper code: https://github.com/nikoloside/far-from-boundary-fields
+
 

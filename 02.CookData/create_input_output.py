@@ -48,6 +48,17 @@ def pack_sdf_with_position_encoding(SDF: np.ndarray, max_point: Optional[Tuple[f
 
     return packed_data
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FFBF mode — Far-From-Boundary Field encoding
+#
+# encode_obj_to_nii() computes the FFBDF (Fracture Fragment Boundary Distance
+# Field), i.e. the "far-from-boundary field" representation of a fractured solid.
+# This is the TEBP data-cooking side of the SMI 2026 paper:
+#   "Far-From-Boundary Fields for Learning Segmented Implicit Solids" (Huang & Kanai)
+#   Code: https://github.com/nikoloside/far-from-boundary-fields
+# For that paper, use this FFBF (FFBDF) mode to encode the fractured solids produced
+# by the simulation in ../01.Data-generation.
+# ─────────────────────────────────────────────────────────────────────────────
 def encode_obj_to_nii(obj_path: str, encoding_type: int = 1, grid_size: int = 128, grid_sizej=128j, normalize: bool = True, withMinus: bool = True) -> None:
     """
     Encode OBJ file to a single-channel NIfTI file with SDF values
