@@ -1,0 +1,12 @@
+torch>=2.1
+siren-pytorch>=0.1.7
+numpy
+scipy
+scikit-image>=0.22
+trimesh>=4.0
+pybullet>=3.2.6
+huggingface_hub
+imageio>=2.31
+imageio-ffmpeg
+pillow
+requests
