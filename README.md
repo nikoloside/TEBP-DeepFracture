@@ -12,7 +12,8 @@
     <br>
         <a href="https://onlinelibrary.wiley.com/doi/10.1111/cgf.70002"><img src="https://img.shields.io/badge/Journal-CGF-blue" height=22.5 alt='journal'></a>
         <a href='https://nikoloside.graphics/deepfracture/'><img src="https://img.shields.io/badge/Project_Page-DeepFracture-red" height=22.5 alt='Project Page'></a>
-        <a href='https://colab.research.google.com/github/nikoloside/TEBP-DeepFracture/blob/main/05.Colab-Runtime/deepfracture_runtime.ipynb'><img src="https://img.shields.io/badge/Demo-Colab_Runtime-orange" height=22.5 alt='Demo'></a>
+        <a href='https://nikoloside.graphics/deepfracture-live/'><img src="https://img.shields.io/badge/Demo-Live_Web_Runtime-e0574f" height=22.5 alt='Demo'></a>
+        <a href='https://colab.research.google.com/github/nikoloside/TEBP-DeepFracture/blob/main/05.Colab-Runtime/deepfracture_runtime.ipynb'><img src="https://img.shields.io/badge/Demo-Colab_Runtime-orange" height=22.5 alt='Colab demo'></a>
         <a href='https://huggingface.co/datasets/nikoloside/break4models'><img src="https://img.shields.io/badge/Dataset-break4models-yellow" height=22.5 alt='Dataset'></a>
         <a href='https://github.com/nikoloside/far-from-boundary-fields'><img src="https://img.shields.io/badge/Related-Far--From--Boundary_Fields_(SMI_2026)-green" height=22.5 alt='Related project'></a>
     <br>
@@ -41,7 +42,7 @@
 - [x] Release 4 Models Drive Google.
 - [x] Release Demo Codebase  (2025/7/15)
 - [x] Release pipeline with a public license.
-- [x] Release Demo Page. (2026/7/17, [Colab web runtime](05.Colab-Runtime/))
+- [x] Release Demo Page. (2026/7/17, [live web runtime](https://nikoloside.graphics/deepfracture-live/) + [Colab runtime](05.Colab-Runtime/))
 - [ ] Release Evaluation Code
 
 ## Overview
