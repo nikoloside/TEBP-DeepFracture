@@ -99,6 +99,9 @@ def extract_fragments(labels, smooth_sigma=1.0):
         mesh = trimesh.Trimesh(vertices=verts, faces=faces, process=True)
         if mesh.is_empty or len(mesh.faces) < 8:
             continue
+        if mesh.volume < 0:      # marching-cubes winding points inward here
+            mesh.invert()
+        mesh.vertex_normals      # cache so exporters write normals
         mesh.visual.vertex_colors = palette[n % len(palette)]
         fragments.append(mesh)
     return fragments
