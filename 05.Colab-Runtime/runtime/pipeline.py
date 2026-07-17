@@ -31,19 +31,25 @@ def parse_csv_preset(csv_file):
 
 
 def run_demo(shape, sphere_pos, sphere_vel, seed=42, resolution=128,
-             gravity=-5.0, seconds_after=3.0, fps=25):
+             gravity=-5.0, seconds_after=3.0, fps=25, status_cb=None):
     """Run the full breakable-object runtime once.
 
+    status_cb(str), when given, receives live stage updates.
     Returns dict with keys: video (mp4 path), glb (fragments path),
     info (collision embedding + stats) — or an "error" message.
     """
+    say = status_cb or (lambda msg: None)
     target_obj = download_asset(f"objs/{shape}.obj")
     workdir = tempfile.mkdtemp(prefix="deepfracture-")
     result = {}
 
+    say("🎬 Rigid-body simulation: projectile in flight…")
+
     def fragment_builder(pos_local, dir_local, imp_norm, imp_raw):
+        say(f"💥 Impact! impulse {imp_raw:.0f} → 🧠 VQ-VAE predicting fracture field…")
         volume, code_idx = predict_gssdf(shape, pos_local, dir_local, imp_norm,
                                          resolution=resolution, seed=seed)
+        say(f"🧩 Watershed segmentation of the predicted field… (codebook #{code_idx})")
         labels = segment_volume(volume)
         fragments = extract_fragments(labels)
         if not fragments:
@@ -55,6 +61,7 @@ def run_demo(shape, sphere_pos, sphere_vel, seed=42, resolution=128,
         glb_path = os.path.join(workdir, "fragments.glb")
         scene.export(glb_path)
         result["glb"] = glb_path
+        say(f"🪨 {len(fragments)} fragments meshed → re-entering the simulation…")
         return export_fragments_for_sim(fragments, os.path.join(workdir, "objs"))
 
     frames, info = run_fracture_sim(
@@ -66,6 +73,7 @@ def run_demo(shape, sphere_pos, sphere_vel, seed=42, resolution=128,
                          "below the fracture threshold). Aim closer to the origin "
                          "or increase the speed."}
 
+    say("🎞 Encoding the runtime video…")
     import imageio.v2 as imageio
     video_path = os.path.join(workdir, "runtime.mp4")
     imageio.mimwrite(video_path, frames, fps=fps,

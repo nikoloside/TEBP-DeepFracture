@@ -1,98 +1,138 @@
-"""DeepFracture Runtime — interactive brittle-fracture demo.
+"""DeepFracture Runtime — game-style interactive brittle-fracture demo.
 
-Rigid-body collision (PyBullet) -> collision embedding -> VQ-VAE generator
-(weights from hf.co/nikoloside/deepfracture) -> watershed segmentation ->
-fragment meshes -> back into the rigid-body simulation.
+Click the target in the scene to shoot a projectile at it. The impact is
+detected by PyBullet, encoded as the paper's 7-D collision embedding, the
+per-shape VQ-VAE (hf.co/nikoloside/deepfracture) predicts the fracture, a
+pure-Python watershed segments it into fragments, and the fragments fall
+back into the simulation.
 """
+
+import queue
+import threading
 
 import gradio as gr
 
-from runtime.pipeline import PRESETS, parse_csv_preset, run_demo
-from runtime.predictor import SHAPES, download_asset
+from runtime.pipeline import run_demo
+from runtime.predictor import SHAPES, download_asset, load_models
+from runtime.scene import click_to_shot, render_preview
 
-DESCRIPTION = """
-# 💥 DeepFracture Runtime
+HEADER = """
+# 💥 DeepFracture Runtime — shooting gallery
 
-Neural brittle-fracture prediction inside a rigid-body runtime, end to end:
-a projectile hits the target (**PyBullet** collision detection), the impact is
-encoded as a 7-D collision embedding *(position, direction, impulse)*, the
-per-shape **VQ-VAE generator** ([weights on the Hub](https://huggingface.co/nikoloside/deepfracture))
-predicts a geometrically-segmented SDF, a pure-Python **watershed / flooding
-segmentation** turns it into fragment meshes — and the fragments drop back
-into the simulation.
+**👆 Click anywhere on the object to shoot it.** A projectile flies at the
+point you click; the impact becomes a 7-D collision embedding, the VQ-VAE
+([weights](https://huggingface.co/nikoloside/deepfracture)) predicts the
+fracture pattern, watershed segmentation extracts the fragments, and they
+tumble back into the rigid-body simulation.
 
-Papers: [DeepFracture (CGF 2025)](https://nikoloside.graphics/deepfracture/) ·
+[DeepFracture (CGF 2025)](https://nikoloside.graphics/deepfracture/) ·
 [Far-From-Boundary Fields (SMI 2026)](https://nikoloside.graphics/far-from-boundary-fields/) ·
-Code: [TEBP-DeepFracture](https://github.com/nikoloside/TEBP-DeepFracture) ·
-[far-from-boundary-fields](https://github.com/nikoloside/far-from-boundary-fields)
+[Code](https://github.com/nikoloside/TEBP-DeepFracture)
 """
 
-DEFAULT_POS = [0.103, 0.822, 2.883]
-DEFAULT_VEL = [-2.34, -18.71, -65.61]
+_preview_cache = {}
 
 
-def apply_preset(name):
-    if name not in PRESETS:
-        return [gr.update()] * 7
-    shape, csv = PRESETS[name]
-    pos, vel = parse_csv_preset(download_asset(csv))
-    return [shape] + [round(v, 3) for v in pos] + [round(v, 3) for v in vel]
+def scene_image(shape):
+    if shape not in _preview_cache:
+        _preview_cache[shape] = render_preview(download_asset(f"objs/{shape}.obj"))
+    return _preview_cache[shape]
 
 
-def fracture(shape, px, py, pz, vx, vy, vz, seed, gravity,
-             progress=gr.Progress()):
-    progress(0.05, desc="Loading model & simulating collision…")
-    out = run_demo(shape, [px, py, pz], [vx, vy, vz], seed=int(seed),
-                   gravity=-5.0 if gravity else 0.0)
+def warmup():
+    try:
+        load_models("squirrel")
+        scene_image("squirrel")
+    except Exception as e:  # noqa: BLE001 — warmup is best-effort
+        print("warmup failed:", e)
+
+
+threading.Thread(target=warmup, daemon=True).start()
+
+
+def load_scene(shape):
+    yield gr.update(), f"⏳ Loading **{shape}** scene…"
+    yield scene_image(shape), f"🎯 Ready — click the **{shape}** to shoot!"
+
+
+def shoot(shape, speed, seed, gravity, evt: gr.SelectData):
+    px, py = evt.index
+    target_obj = download_asset(f"objs/{shape}.obj")
+
+    shot = click_to_shot(target_obj, px, py, speed)
+    if shot is None:
+        yield (gr.update(), "❌ Missed — click **on** the object itself.",
+               gr.update(), gr.update(), gr.update())
+        return
+
+    aimed = render_preview(target_obj, aim_world=shot["hit_pos"],
+                           sphere_pos=shot["sphere_pos"])
+    yield (aimed,
+           f"🎯 Locked on `{[round(v, 2) for v in shot['hit_pos']]}` — firing at speed {speed:.0f}…",
+           None, None, None)
+
+    events = queue.Queue()
+    box = {}
+
+    def worker():
+        try:
+            box["out"] = run_demo(shape, shot["sphere_pos"], shot["sphere_vel"],
+                                  seed=int(seed), gravity=-5.0 if gravity else 0.0,
+                                  status_cb=events.put)
+        except Exception as e:  # noqa: BLE001 — surfaced to the UI below
+            box["out"] = {"error": f"runtime crashed: {e}"}
+        finally:
+            events.put(None)
+
+    threading.Thread(target=worker, daemon=True).start()
+
+    log = []
+    while True:
+        msg = events.get()
+        if msg is None:
+            break
+        log.append(msg)
+        yield (gr.update(), "\n\n".join(log), gr.update(), gr.update(), gr.update())
+
+    out = box.get("out", {"error": "no result"})
     if "error" in out:
-        raise gr.Error(out["error"])
+        yield (gr.update(), "\n\n".join(log + [f"❌ {out['error']}"]),
+               gr.update(), gr.update(), gr.update())
+        return
+
     info = out["info"]
-    summary = (
-        f"Impact at step {info['impact_step']} · "
-        f"impulse {info['impulse_raw']:.0f} (norm {info['impulse_norm']:+.2f}) · "
-        f"codebook #{info['codebook_index']} · "
-        f"{info['n_fragments']} fragments"
-    )
-    return out["video"], out["glb"], summary, info
+    log.append(f"✅ **{info['n_fragments']} fragments** · impulse {info['impulse_raw']:.0f} "
+               f"(norm {info['impulse_norm']:+.2f}) · codebook #{info['codebook_index']}")
+    yield (gr.update(), "\n\n".join(log), out["video"], out["glb"], info)
 
 
 with gr.Blocks(title="DeepFracture Runtime") as demo:
-    gr.Markdown(DESCRIPTION)
+    gr.Markdown(HEADER)
 
     with gr.Row():
-        with gr.Column(scale=1):
-            preset = gr.Dropdown(list(PRESETS.keys()), value="squirrel-260",
-                                 label="Collision preset (from the paper's runtime CSVs)")
-            shape = gr.Dropdown(SHAPES, value="squirrel", label="Target shape")
-            with gr.Group():
-                gr.Markdown("**Projectile start position**")
-                with gr.Row():
-                    px = gr.Slider(-3, 3, DEFAULT_POS[0], step=0.01, label="x")
-                    py = gr.Slider(-3, 3, DEFAULT_POS[1], step=0.01, label="y")
-                    pz = gr.Slider(-3, 3, DEFAULT_POS[2], step=0.01, label="z")
-                gr.Markdown("**Projectile velocity**")
-                with gr.Row():
-                    vx = gr.Slider(-120, 120, DEFAULT_VEL[0], step=0.5, label="vx")
-                    vy = gr.Slider(-120, 120, DEFAULT_VEL[1], step=0.5, label="vy")
-                    vz = gr.Slider(-120, 120, DEFAULT_VEL[2], step=0.5, label="vz")
+        with gr.Column(scale=3):
+            scene = gr.Image(label="🎯 Click the target to shoot", interactive=False)
+            status = gr.Markdown("⏳ Loading scene… (first launch downloads the "
+                                 "model weights, ~190 MB — give it a minute)")
             with gr.Row():
-                seed = gr.Number(42, label="Latent seed", precision=0)
+                shape = gr.Dropdown(SHAPES, value="squirrel", label="Target shape")
+                speed = gr.Slider(20, 120, 65, step=1, label="Projectile speed")
+            with gr.Row():
+                seed = gr.Number(42, label="Latent seed (change it for a different break)",
+                                 precision=0)
                 gravity = gr.Checkbox(True, label="Gravity after fracture")
-            run_btn = gr.Button("💥 Fracture!", variant="primary")
 
         with gr.Column(scale=2):
-            video = gr.Video(label="Runtime simulation", autoplay=True)
-            model3d = gr.Model3D(label="Predicted fragments (drag to inspect)",
+            video = gr.Video(label="Runtime replay", autoplay=True, loop=True)
+            model3d = gr.Model3D(label="Fragments (drag to inspect)",
                                  clear_color=[0.95, 0.95, 0.95, 1.0])
-            summary = gr.Textbox(label="Result", interactive=False)
             with gr.Accordion("Collision embedding (network input)", open=False):
                 info_json = gr.JSON()
 
-    preset.change(apply_preset, inputs=preset,
-                  outputs=[shape, px, py, pz, vx, vy, vz])
-    run_btn.click(fracture,
-                  inputs=[shape, px, py, pz, vx, vy, vz, seed, gravity],
-                  outputs=[video, model3d, summary, info_json])
+    demo.load(load_scene, inputs=shape, outputs=[scene, status])
+    shape.change(load_scene, inputs=shape, outputs=[scene, status])
+    scene.select(shoot, inputs=[shape, speed, seed, gravity],
+                 outputs=[scene, status, video, model3d, info_json])
 
 
 if __name__ == "__main__":
