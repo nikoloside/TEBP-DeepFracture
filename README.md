@@ -44,7 +44,7 @@
 - [x] Release Demo Codebase  (2025/7/15)
 - [x] Release pipeline with a public license.
 - [x] Release Demo Page. (2026/7/17, [live web runtime](https://nikoloside.graphics/deepfracture-live/) + [Colab runtime](05.Colab-Runtime/))
-- [ ] Release Evaluation Code
+- [x] Release Evaluation Code
 
 ## Overview
 
